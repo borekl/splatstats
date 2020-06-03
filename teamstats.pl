@@ -5,7 +5,12 @@ use warnings;
 use v5.10;
 
 use Path::Tiny;
-use JSON::MaybeXS qw(decode_json encode_json);
+use JSON::MaybeXS;
+
+
+#=== globals =================================================================
+
+my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
 
 
 #=== configuration ===========================================================
@@ -43,7 +48,7 @@ my $state = {};
 
 if(-f $state_file) {
   say 'State file exists, loading';
-  $state = decode_json($state_file->slurp_raw());
+  $state = $js->decode($state_file->slurp_raw());
 };
 
 
@@ -75,5 +80,5 @@ foreach my $server (keys %{$cfg{servers}}) {
 say "Saving state";
 
 my $state_new = $state_file->sibling($state_file->basename . ".$$");
-$state_new->spew_raw(encode_json($state));
+$state_new->spew_raw($js->encode($state));
 $state_new->move($state_file);
