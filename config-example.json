@@ -1,6 +1,7 @@
 {
   "state" : "state.json",
   "logdir" : "logs",
+  "htmldir" : "html",
   "wget" : "wget --connect-timeout=10 --dns-timeout=5 --read-timeout=60 -t 1 -c -q -O %s %s",
 
   "match" : {

@@ -8,6 +8,7 @@ use Path::Tiny;
 use JSON::MaybeXS;
 use Time::Moment;
 use Try::Tiny;
+use Template;
 
 
 #=== globals =================================================================
@@ -141,6 +142,26 @@ foreach my $server (keys %{$cfg->{servers}}) {
 }
 
 #=== processing of data ======================================================
+
+my %data = (
+  games => $state->{games},
+  milestones => $state->{milestones},
+  cfg => $cfg,
+);
+
+#=== generate HTML pages =====================================================
+
+my $tt = Template->new(
+  'OUTPUT_PATH' => $cfg->{htmldir},
+  'INCLUDE_PATH' => 'templates',
+  'RELATIVE' => 1
+);
+
+$tt->process(
+  'index.tt',
+  \%data,
+  'index.html'
+) or die;
 
 
 #=== save state ==============================================================

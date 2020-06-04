@@ -1,0 +1,19 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <title>TeamSplat Statistics</title>
+</head>
+
+<body>
+
+<h1>TeamSplat Statistics</h1>
+
+<p>Number of games: [% games.size %]<br>
+Number of milestones: [% milestones.size %]<br>
+Servers used: [% cfg.servers.keys.sort.join(', ') %]</p>
+
+</body>
+
+</html>
