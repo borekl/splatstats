@@ -52,6 +52,9 @@ my $state = {};
 if(-f $state_file) {
   say 'State file exists, loading';
   $state = $js->decode($state_file->slurp_raw());
+} else {
+  $state->{games} = [];
+  $state->{milestones} = [];
 }
 
 
@@ -114,6 +117,13 @@ foreach my $server (keys %{$cfg->{servers}}) {
       }
 
       $count_selected++;
+
+      # store into state
+      if($log eq 'log') {
+        push(@{$state->{games}}, \%row);
+      } else {
+        push(@{$state->{milestones}}, \%row);
+      }
     }
 
     printf(
