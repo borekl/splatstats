@@ -56,22 +56,22 @@ sub format_duration
 
   my $re = '';
   if($days) {
-    $re = sprintf('%d, ');
+    $re = sprintf('%d, ', $days);
   }
   $re .= sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
   return $re;
 }
 
-# dump url
-sub dump_url
+# morgue url
+sub morgue_url
 {
   my $row = shift;
   my $server = $row->{server};
   my $player = $row->{name};
 
   # if dump url is not defined, do nothing
-  return if(!exists $cfg->{servers}{$server}{dump});
-  my $template = $cfg->{servers}{$server}{dump};
+  return if(!exists $cfg->{servers}{$server}{morgue});
+  my $template = $cfg->{servers}{$server}{morgue};
 
   # get formatted time
   return if !exists $row->{end};
@@ -83,6 +83,22 @@ sub dump_url
 
   # save and finsh
   $row->{dumpurl} = $template;
+}
+
+# in-progress dump
+sub dump_url
+{
+  my ($player, $server) = @_;
+
+  # return undef if dump URL is not defined
+  return undef if !exists $cfg->{servers}{$server}{dump};
+  my $template = $cfg->{servers}{$server}{dump};
+
+  # perform token replacement
+  $template =~ s/%u/$player/g;
+
+  # finish
+  return $template;
 }
 
 
@@ -115,6 +131,13 @@ if(-f $state_file) {
   $state->{games} = [];
   $state->{milestones} = [];
 }
+
+
+#=== resolve "now" moment ====================================================
+
+my $now = time();
+my $end_of_tourney = $cfg->{match}{end}->epoch;
+$now = $end_of_tourney if $now > $end_of_tourney;
 
 
 #=== loading of logfiles =====================================================
@@ -179,13 +202,16 @@ if($cmd_retrieve) {
           next if $tm_time < $cfg->{match}{start};
           last if $tm_time >= $cfg->{match}{end};
           $row{time_epoch} = to_moment($row{time})->epoch;
+          $row{time_from_now} = $now - $row{time_epoch};
+          $row{time_from_now_fmt} = format_duration($row{time_from_now});
+          $row{milestone} =~ s/.$//;
         }
 
         # save server id
         $row{server} = $server;
 
         # get dump url
-        dump_url(\%row);
+        morgue_url(\%row);
 
         $count_selected++;
 
@@ -216,7 +242,7 @@ if($cmd_retrieve) {
 #=== processing of data ======================================================
 
 my %data = (
-  games => $state->{games},
+  games => { all => $state->{games} },
   milestones => $state->{milestones},
   cfg => $cfg,
 );
@@ -224,14 +250,103 @@ my %data = (
 my $games = $state->{games};
 my $milestones = $state->{milestones};
 
+#--- list of won clan games --------------------------------------------------
+
 my @won = sort {
   $a->{end_epoch} <=> $b->{end_epoch}
 } grep {
   $_->{ktyp} eq 'winning'
-} @$games;
+} @{$games};
 
 $data{clan}{won} = \@won;
 
+#--- create index of games by "start" field
+
+my $games_by_start = $data{games}{by_start} = {};
+foreach my $g (@{$games}) {
+  $games_by_start->{$g->{start}} = $g;
+}
+
+#--- last milestone per (player, server)
+
+my %last_milestones;
+
+foreach my $ms (sort { $a->{time_epoch} <=> $b->{time_epoch} } @$milestones) {
+  $last_milestones{$ms->{name}}{$ms->{server}} = $ms;
+}
+
+$data{players}{lastms} = \%last_milestones;
+
+#--- in progress games
+
+# to get games in progress, we scan the last milestone per (player, server)
+# found in the previous step and see if there's corresponding game in the games
+# log; if there isn't, the milestone belongs to an unfinished, on-going game
+
+my @in_progress;
+
+foreach my $player (keys %last_milestones) {
+  foreach my $srv (keys %{$last_milestones{$player}}) {
+    my $ms = $last_milestones{$player}{$srv};
+    if(!exists $games_by_start->{$ms->{start}}) {
+      push(@in_progress, $ms);
+    }
+  }
+}
+
+@in_progress = sort {
+  $a->{time_from_now} <=> $b->{time_from_now}
+} @in_progress;
+$data{clan}{in_progress} = \@in_progress;
+
+#--- generate list of games, milestones and used servers by players
+
+my %games_by_players;
+my %wins_by_players;
+my %milestones_by_players;
+my %servers_by_players;
+my %player_dumps;
+
+foreach my $plr (@{$cfg->{match}{members}}) {
+
+  # games
+  $games_by_players{$plr} = [ sort {
+    $a->{end_epoch} <=> $b->{end_epoch}
+  } grep {
+    $_->{name} eq $plr
+  } @$games ];
+
+  # wins
+  $wins_by_players{$plr} = [ grep {
+    $_->{ktyp} eq 'winning'
+  } @{$games_by_players{$plr}} ];
+
+  # milestones
+  $milestones_by_players{$plr} = [ sort {
+    $a->{time_epoch} <=> $b->{time_epoch}
+  } grep {
+    $_->{name} eq $plr
+  } @$milestones ];
+
+  # servers used by player
+  $servers_by_players{$plr} = {};
+  $player_dumps{$plr} = {};
+  foreach my $ms (@{$milestones_by_players{$plr}}) {
+    next if $ms->{type} ne 'begin';
+    $servers_by_players{$plr}{$ms->{server}}++;
+  }
+  $servers_by_players{$plr} = [ sort {
+    $servers_by_players{$plr}{$b} cmp $servers_by_players{$plr}{$a}
+  } keys %{$servers_by_players{$plr}} ];
+  foreach my $server (@{$servers_by_players{$plr}}) {
+    $player_dumps{$plr}{$server} = dump_url($plr, $server);
+  }
+}
+
+$data{games}{by_players} = \%games_by_players;
+$data{wins}{by_players} = \%wins_by_players;
+$data{servers}{by_players} = \%servers_by_players;
+$data{player_dumps} = \%player_dumps;
 
 #=== generate HTML pages =====================================================
 

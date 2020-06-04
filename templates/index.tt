@@ -9,12 +9,93 @@
 
 <body>
 
-<h1>TeamSplat Statistics</h1>
+<div class="header">
+  <h1>TeamSplat Statistics</h1>
+  <h3>DCSS Tournament 0.25</h3>
+</div>
 
-<p>Number of games: [% games.size %]<br>
-Number of won games: [% clan.won.size %]<br>
-Number of milestones: [% milestones.size %]<br>
-Servers used: [% cfg.servers.keys.sort.join(', ') %]</p>
+<main>
+
+<div class="flexrow">
+
+<div>
+
+<h2>Clan Members</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>player</th>
+      <th>games</th>
+      <th>wins</th>
+      <th>dumps</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOR pl IN cfg.match.members.sort %]
+      <tr>
+        <td>[% pl %]</td>
+        <td class="numeric">[% games.by_players.item(pl).size %]</td>
+        <td class="numeric">[% wins.by_players.item(pl).size %]</td>
+        <td>
+          [% FOR srv IN servers.by_players.item(pl) %]
+            [% IF player_dumps.item(pl).item(srv) %]
+              <a href="[% player_dumps.item(pl).item(srv) %]">[% srv.upper %]</a>
+            [% ELSE %]
+              [% srv.upper %]
+            [% END %]
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+</div>
+
+<div>
+
+<h2>Games In Progress</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>player</th>
+      <th>char</th>
+      <th>place</th>
+      <th>xl</th>
+      <th>runes</th>
+      <th>milestone</th>
+      <th>last seen</th>
+      <th>srv</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% IF !clan.in_progress.size %]
+      <tr><td colspan="9">no games in progress</td></tr>
+    [% END %]
+    [% SET i = 1; FOR ms IN clan.in_progress %]
+      <tr>
+        <td>[% i; SET i = i + 1 %]</td>
+        <td>[% ms.name %]</td>
+        <td>[% ms.char %][% IF ms.god %] of [% ms.god %][% END %]</td>
+        <td>[% ms.place %]</td>
+        <td class="numeric">[% ms.xl %]</td>
+        <td class="numeric">[% ms.urune %]</td>
+        <td>[% ms.milestone %]</td>
+        <td class="numeric">[% ms.time_from_now_fmt %] ago</td>
+        <td>[% ms.server.upper %]</td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+</div>
+</div>
+
+[% IF clan.won.size %]
 
 <h2>Won Games</h2>
 
@@ -39,7 +120,7 @@ Servers used: [% cfg.servers.keys.sort.join(', ') %]</p>
 
   <tbody>
     [% SET i = clan.won.size; FOR g IN clan.won.reverse %]
-    <tr>
+    <tr class="won">
       <td class="numeric">[% i; SET i = i - 1 %]</td>
       <td class="numeric">
         [% IF g.dumpurl %]
@@ -62,6 +143,10 @@ Servers used: [% cfg.servers.keys.sort.join(', ') %]</p>
     [% END %]
   </tbody>
 </table>
+
+[% END %]
+
+</main>
 
 </body>
 
