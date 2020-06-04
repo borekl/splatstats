@@ -1,0 +1,62 @@
+{
+  "state" : "state.json",
+  "logdir" : "logs",
+  "wget" : "wget --connect-timeout=10 --dns-timeout=5 --read-timeout=60 -t 1 -c -q -O %s %s",
+
+  "match" : {
+    "members" : [
+      "Mandevil", "shummie", "particleface", "BerryKnight", "Helmschank",
+      "fearitself"
+    ],
+    "start" : "2019-10-25T20:00:00Z",
+    "end"   : "2019-11-10T20:00:00Z"
+  },
+
+  "servers" : {
+
+    "cao" : {
+      "log" : {
+        "url" : "http://crawl.akrasiac.org/logfile24",
+        "file" : "log.cao.24.games"
+      },
+      "milestones" : {
+        "url" : "http://crawl.akrasiac.org/milestones24",
+        "file" : "log.cao.24.milestones"
+      }
+    },
+
+    "cbro" : {
+      "log" : {
+        "url" : "http://crawl.berotato.org/crawl/meta/0.24/logfile",
+        "file" : "log.cbro.24.games"
+      },
+      "milestones" : {
+        "url" : "http://crawl.berotato.org/crawl/meta/0.24/milestones",
+        "file" : "log.cbro.24.milestones"
+      }
+    },
+
+    "cko" : {
+      "log" : {
+        "url" : "https://crawl.kelbi.org/crawl/meta/0.24/logfile",
+        "file" : "log.cko.24.games"
+      },
+      "milestones" : {
+        "url" : "https://crawl.kelbi.org/crawl/meta/0.24/milestones",
+        "file" : "log.cko.24.milestones"
+      }
+    },
+
+    "cue" : {
+      "log" : {
+        "url" : "https://underhound.eu/crawl/meta/0.24/logfile",
+        "file" : "log.cue.24.games"
+      },
+      "milestones" : {
+        "url" : "https://underhound.eu/crawl/meta/0.24/milestones",
+        "file" : "log.cue.24.milestones"
+      }
+    }
+  }
+
+}

@@ -15,49 +15,12 @@ use Try::Tiny;
 my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
 
 
-#=== configuration ===========================================================
-
-my %cfg = (
-
-  state => 'state.json',
-
-  logdir => 'logs',
-
-  wget => 'wget --connect-timeout=10 --dns-timeout=5 --read-timeout=60 -t 1 -c -q -O %s %s',
-
-  match => {
-    members => [
-      'Mandevil', 'shummie', 'particleface', 'BerryKnight', 'MrMan',
-      'fearitself'
-    ],
-    start => Time::Moment->from_string('20191121T000000+0200'),
-    end   => Time::Moment->from_string('20200401T000000+0200'),
-  },
-
-  servers => {
-    
-    cue => {
-      log => {
-        url => 'https://underhound.eu/crawl/meta/0.24/logfile',
-        file => 'log.cue.24.games',
-      },
-      milestones => {
-        url => 'https://underhound.eu/crawl/meta/0.24/milestones',
-        file => 'log.cue.24.milestones',
-      },
-    }
-
-  }
-
-);
-
-
 #=== aux functions ===========================================================
 
 # Convert time as saved in DCSS logfiles to Unix epoch time. DCSS
-# "start"/"end" time specification is particularly brain-damage one; it looks
-# like ISO 8601, but the T delimiter is missing, the 'S' at the end means
-# who-knows-what and the month field is 0-based. Makes total sense, right?
+# "start"/"end" time specification is confusing: it looks like ISO 8601, but
+# the T delimiter is missing, the 'S' at the end means who-knows-what and the
+# month field is 0-based.
 
 sub to_moment
 {
@@ -69,9 +32,21 @@ sub to_moment
 }
 
 
+#=== load configuration =======================================================
+
+my $config_file = path('config.json');
+my $cfg = $js->decode($config_file->slurp_raw);
+
+# convert match.start and match.end values into Time::Moment instances
+foreach my $t (qw(start end)) {
+  if(exists $cfg->{match}{$t}) {
+    $cfg->{match}{$t} = Time::Moment->from_string($cfg->{match}{$t});
+  }
+}
+
 #=== state initialization/loading ============================================
 
-my $state_file = path($cfg{state});
+my $state_file = path($cfg->{state});
 my $state = {};
 
 if(-f $state_file) {
@@ -82,23 +57,23 @@ if(-f $state_file) {
 
 #=== loading of logfiles =====================================================
 
-my $logdir = path($cfg{logdir});
+my $logdir = path($cfg->{logdir});
 
-foreach my $server (keys %{$cfg{servers}}) {
+foreach my $server (keys %{$cfg->{servers}}) {
 
   say "Processing $server";
 
   foreach my $log (qw(log milestones)) {
-  
+
     # get URL and localfile
-    my $url = $cfg{servers}{$server}{$log}{url};
-    my $file = $logdir->child($cfg{servers}{$server}{$log}{file});
+    my $url = $cfg->{servers}{$server}{$log}{url};
+    my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
 
     # get our last position in the file (or 0 if none)
-    my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;  
+    my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
 
     # retrieve new data from URL
-    my $r = system(sprintf($cfg{wget}, $file, $url));
+    my $r = system(sprintf($cfg->{wget}, $file, $url));
     die "Failed to get $url" if $r;
 
     # open the file and seek into it
@@ -122,19 +97,19 @@ foreach my $server (keys %{$cfg{servers}}) {
       $count_total++;
 
       # check for team members, ignore all other entries
-      next if !(grep { $_ eq $row{name} } @{$cfg{match}{members}});
+      next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
 
       # convert dates into epoch format
       if($log eq 'log') {
         my $tm_start = to_moment($row{start});
-        next if $tm_start < $cfg{match}{start};
+        next if $tm_start < $cfg->{match}{start};
         $row{start_epoch} = $tm_start->epoch;
         my $tm_end = to_moment($row{end});
-        next if $tm_end >= $cfg{match}{end};
+        next if $tm_end >= $cfg->{match}{end};
         $row{end_epoch} = $tm_end->epoch;
       } else {
         my $tm_time = to_moment($row{time});
-        next if $tm_time < $cfg{match}{start} || $tm_time >= $cfg{match}{end};
+        next if $tm_time < $cfg->{match}{start} || $tm_time >= $cfg->{match}{end};
         $row{time_epoch} = to_moment($row{time})->epoch;
       }
 

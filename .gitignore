@@ -1,3 +1,5 @@
 logs/*
 *~
-*.json
+state.json
+config.json
+
