@@ -9,11 +9,17 @@ use JSON::MaybeXS;
 use Time::Moment;
 use Try::Tiny;
 use Template;
+use Getopt::Long;
 
 
 #=== globals =================================================================
 
 my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
+
+
+#=== command line options ====================================================
+
+my $cmd_retrieve = 1;           # retrieve remote logs
 
 
 #=== aux functions ===========================================================
@@ -31,6 +37,11 @@ sub to_moment
   $tm = sprintf('%04d%02d%02dT%sZ', $1, $2+1, $3, $4);
   return Time::Moment->from_string($tm);
 }
+
+
+#=== command-line processing ==================================================
+
+GetOptions('retrieve!' => \$cmd_retrieve);
 
 
 #=== load configuration =======================================================
@@ -61,81 +72,85 @@ if(-f $state_file) {
 
 #=== loading of logfiles =====================================================
 
-my $logdir = path($cfg->{logdir});
+if($cmd_retrieve) {
 
-foreach my $server (keys %{$cfg->{servers}}) {
+  my $logdir = path($cfg->{logdir});
 
-  say "Processing $server";
+  foreach my $server (keys %{$cfg->{servers}}) {
 
-  foreach my $log (qw(log milestones)) {
+    say "Processing $server";
 
-    # get URL and localfile
-    my $url = $cfg->{servers}{$server}{$log}{url};
-    my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
+    foreach my $log (qw(log milestones)) {
 
-    # get our last position in the file (or 0 if none)
-    my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
+      # get URL and localfile
+      my $url = $cfg->{servers}{$server}{$log}{url};
+      my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
 
-    # retrieve new data from URL
-    my $r = system(sprintf($cfg->{wget}, $file, $url));
-    die "Failed to get $url" if $r;
+      # get our last position in the file (or 0 if none)
+      my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
 
-    # open the file and seek into it
-    open(my $fh, '<', $file) or die 'Failed to open ' . $file;
-    seek($fh, $fpos, 0) if $fpos;
+      # retrieve new data from URL
+      my $r = system(sprintf($cfg->{wget}, $file, $url));
+      die "Failed to get $url" if $r;
 
-    # read the new data
-    my ($count_total, $count_selected) = (0,0);
-    while(my $line = <$fh>) {
-      chomp $line;
-      my %row;
+      # open the file and seek into it
+      open(my $fh, '<', $file) or die 'Failed to open ' . $file;
+      seek($fh, $fpos, 0) if $fpos;
 
-      # following regex splits the line by ':' delimiter, but ignores '::',
-      # which works as an escape to denote ':' in value
-      foreach my $fv (split(/(?<!:):(?!:)/, $line)) {
-        $fv =~ s/::/:/g;
-        my @fv = split(/=/, $fv);
-        $row{$fv[0]} = $fv[1];
+      # read the new data
+      my ($count_total, $count_selected) = (0,0);
+      while(my $line = <$fh>) {
+        chomp $line;
+        my %row;
+
+        # following regex splits the line by ':' delimiter, but ignores '::',
+        # which works as an escape to denote ':' in value
+        foreach my $fv (split(/(?<!:):(?!:)/, $line)) {
+          $fv =~ s/::/:/g;
+          my @fv = split(/=/, $fv);
+          $row{$fv[0]} = $fv[1];
+        }
+
+        $count_total++;
+
+        # check for team members, ignore all other entries
+        next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
+
+        # convert dates into epoch format
+        if($log eq 'log') {
+          my $tm_start = to_moment($row{start});
+          next if $tm_start < $cfg->{match}{start};
+          $row{start_epoch} = $tm_start->epoch;
+          my $tm_end = to_moment($row{end});
+          next if $tm_end >= $cfg->{match}{end};
+          $row{end_epoch} = $tm_end->epoch;
+        } else {
+          my $tm_time = to_moment($row{time});
+          next if $tm_time < $cfg->{match}{start} || $tm_time >= $cfg->{match}{end};
+          $row{time_epoch} = to_moment($row{time})->epoch;
+        }
+
+        $count_selected++;
+
+        # store into state
+        if($log eq 'log') {
+          push(@{$state->{games}}, \%row);
+        } else {
+          push(@{$state->{milestones}}, \%row);
+        }
       }
 
-      $count_total++;
+      printf(
+        "  %d new lines (%d matched) in %s/%s\n",
+        $count_total, $count_selected, $server, $log
+      );
 
-      # check for team members, ignore all other entries
-      next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
+      # finish
+      $fpos = tell($fh);
+      $state->{servers}{$server}{$log}{fpos} = $fpos;
+      close($fh);
 
-      # convert dates into epoch format
-      if($log eq 'log') {
-        my $tm_start = to_moment($row{start});
-        next if $tm_start < $cfg->{match}{start};
-        $row{start_epoch} = $tm_start->epoch;
-        my $tm_end = to_moment($row{end});
-        next if $tm_end >= $cfg->{match}{end};
-        $row{end_epoch} = $tm_end->epoch;
-      } else {
-        my $tm_time = to_moment($row{time});
-        next if $tm_time < $cfg->{match}{start} || $tm_time >= $cfg->{match}{end};
-        $row{time_epoch} = to_moment($row{time})->epoch;
-      }
-
-      $count_selected++;
-
-      # store into state
-      if($log eq 'log') {
-        push(@{$state->{games}}, \%row);
-      } else {
-        push(@{$state->{milestones}}, \%row);
-      }
     }
-
-    printf(
-      "  %d new lines (%d matched) in %s/%s\n",
-      $count_total, $count_selected, $server, $log
-    );
-
-    # finish
-    $fpos = tell($fh);
-    $state->{servers}{$server}{$log}{fpos} = $fpos;
-    close($fh);
 
   }
 
@@ -166,8 +181,10 @@ $tt->process(
 
 #=== save state ==============================================================
 
-say "Saving state";
+if($cmd_retrieve) {
+  say "Saving state";
 
-my $state_new = $state_file->sibling($state_file->basename . ".$$");
-$state_new->spew_raw($js->encode($state));
-$state_new->move($state_file);
+  my $state_new = $state_file->sibling($state_file->basename . ".$$");
+  $state_new->spew_raw($js->encode($state));
+  $state_new->move($state_file);
+}
