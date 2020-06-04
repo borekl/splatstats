@@ -15,6 +15,7 @@ use Getopt::Long;
 #=== globals =================================================================
 
 my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
+my $cfg;
 
 
 #=== command line options ====================================================
@@ -47,7 +48,7 @@ GetOptions('retrieve!' => \$cmd_retrieve);
 #=== load configuration =======================================================
 
 my $config_file = path('config.json');
-my $cfg = $js->decode($config_file->slurp_raw);
+$cfg = $js->decode($config_file->slurp_raw);
 
 # convert match.start and match.end values into Time::Moment instances
 foreach my $t (qw(start end)) {
