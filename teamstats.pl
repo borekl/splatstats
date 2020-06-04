@@ -39,6 +39,52 @@ sub to_moment
   return Time::Moment->from_string($tm);
 }
 
+# format duration to human readable format
+sub format_duration
+{
+  my $secs = shift;
+  use integer;
+
+  my $days = $secs / 86400;
+  $secs %= 86400;
+
+  my $hours = $secs / 3600;
+  $secs %= 3600;
+
+  my $minutes = $secs / 60;
+  $secs %= 60;
+
+  my $re = '';
+  if($days) {
+    $re = sprintf('%d, ');
+  }
+  $re .= sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
+  return $re;
+}
+
+# dump url
+sub dump_url
+{
+  my $row = shift;
+  my $server = $row->{server};
+  my $player = $row->{name};
+
+  # if dump url is not defined, do nothing
+  return if(!exists $cfg->{servers}{$server}{dump});
+  my $template = $cfg->{servers}{$server}{dump};
+
+  # get formatted time
+  return if !exists $row->{end};
+  my $tm = to_moment($row->{end})->strftime('%Y%m%d-%H%M%S');
+
+  # perform token replacement
+  $template =~ s/%u/$player/g;
+  $template =~ s/%d/$tm/g;
+
+  # save and finsh
+  $row->{dumpurl} = $template;
+}
+
 
 #=== command-line processing ==================================================
 
@@ -117,19 +163,29 @@ if($cmd_retrieve) {
         # check for team members, ignore all other entries
         next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
 
-        # convert dates into epoch format
+        # convert dates into epoch/human readble format and match time bracket
         if($log eq 'log') {
           my $tm_start = to_moment($row{start});
           next if $tm_start < $cfg->{match}{start};
           $row{start_epoch} = $tm_start->epoch;
+          $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
           my $tm_end = to_moment($row{end});
-          next if $tm_end >= $cfg->{match}{end};
+          last if $tm_end >= $cfg->{match}{end};
           $row{end_epoch} = $tm_end->epoch;
+          $row{end_fmt} = $tm_end->strftime('%Y-%m-%d %H:%M:%S');
+          $row{dur_fmt} = format_duration($row{dur});
         } else {
           my $tm_time = to_moment($row{time});
-          next if $tm_time < $cfg->{match}{start} || $tm_time >= $cfg->{match}{end};
+          next if $tm_time < $cfg->{match}{start};
+          last if $tm_time >= $cfg->{match}{end};
           $row{time_epoch} = to_moment($row{time})->epoch;
         }
+
+        # save server id
+        $row{server} = $server;
+
+        # get dump url
+        dump_url(\%row);
 
         $count_selected++;
 
@@ -164,6 +220,18 @@ my %data = (
   milestones => $state->{milestones},
   cfg => $cfg,
 );
+
+my $games = $state->{games};
+my $milestones = $state->{milestones};
+
+my @won = sort {
+  $a->{end_epoch} <=> $b->{end_epoch}
+} grep {
+  $_->{ktyp} eq 'winning'
+} @$games;
+
+$data{clan}{won} = \@won;
+
 
 #=== generate HTML pages =====================================================
 

@@ -4,6 +4,7 @@
 
 <head>
   <title>TeamSplat Statistics</title>
+  <link rel="stylesheet" href="default.css" type="text/css">
 </head>
 
 <body>
@@ -11,8 +12,56 @@
 <h1>TeamSplat Statistics</h1>
 
 <p>Number of games: [% games.size %]<br>
+Number of won games: [% clan.won.size %]<br>
 Number of milestones: [% milestones.size %]<br>
 Servers used: [% cfg.servers.keys.sort.join(', ') %]</p>
+
+<h2>Won Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>species</th>
+      <th>background</th>
+      <th>god</th>
+      <th>title</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [% SET i = clan.won.size; FOR g IN clan.won.reverse %]
+    <tr>
+      <td class="numeric">[% i; SET i = i - 1 %]</td>
+      <td class="numeric">
+        [% IF g.dumpurl %]
+          <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+        [% ELSE %]
+          [% g.sc.chunk(-3).join(',') %]
+        [% END %]
+      </td>
+      <td>[% g.name %]</td>
+      <td>[% g.race %]</td>
+      <td>[% g.cls %]</td>
+      <td>[% g.god %]</td>
+      <td>[% g.title %]</td>
+      <td class="numeric">[% g.xl %]</td>
+      <td class="numeric">[% g.turn %]</td>
+      <td class="numeric">[% g.dur_fmt %]</td>
+      <td class="numeric">[% g.urune %]</td>
+      <td>[% g.end_fmt %]</td>
+    </tr>
+    [% END %]
+  </tbody>
+</table>
 
 </body>
 

@@ -1,0 +1,26 @@
+body {
+  font-family: "Trebuchet MS", "Tahoma", "Verdana", "Sans-Serif";
+}
+
+.numeric {
+  text-align: right;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background-color: rgb(255, 250, 224);
+}
+
+tr:nth-child(2n) {
+  background-color: #f0ffe0;
+}
+
+th,td {
+  font-size: 75%;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  padding: 0.4rem;
+}
