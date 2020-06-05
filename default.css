@@ -80,6 +80,10 @@ th {
   background-color: rgb(255, 250, 224);
 }
 
+tbody th {
+  text-align: left;
+}
+
 tr {
   color: #666;
 }

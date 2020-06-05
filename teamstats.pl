@@ -404,6 +404,36 @@ $data{wins}{by_players} = \%wins_by_players;
 $data{servers}{by_players} = \%servers_by_players;
 $data{player_dumps} = \%player_dumps;
 
+#--- games by turncount ------------------------------------------------------
+
+$data{games}{turncount} = [
+  sort {
+    $a->{turn} <=> $b->{turn}
+  } grep {
+    $_->{ktyp} eq 'winning'
+  } @$games
+];
+
+#--- games by realtime -------------------------------------------------------
+
+$data{games}{realtime} = [
+  sort {
+    $a->{dur} <=> $b->{dur}
+  } grep {
+    $_->{ktyp} eq 'winning'
+  } @$games
+];
+
+#--- games by turncount ------------------------------------------------------
+
+$data{games}{score} = [
+  sort {
+    $b->{sc} <=> $a->{sc}
+  } @$games
+];
+
+#--- debug output ------------------------------------------------------------
+
 path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
 
 

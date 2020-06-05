@@ -209,6 +209,83 @@
 
 [% END %]
 
+[%# ======================================================================== %]
+[%# === CLAN BEST ========================================================== %]
+[%# ======================================================================== %]
+
+[% IF clan.won.size %]
+<h2>Clan's Best Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th>category</th>
+      <th>player</th>
+      <th>character</th>
+      <th>achievement</th>
+      <th>dump</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% IF games.turncount.size %]
+    <tr>
+      [% SET g = games.turncount.item(0) %]
+      <th>Lowest turncount</th>
+      <td>[% g.name %]</td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+    [% IF games.realtime.size %]
+    <tr>
+      [% SET g = games.realtime.item(0) %]
+      <th>Fastest realtime</th>
+      <td>[% g.name %]</td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.dur_fmt %]</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+    [% IF games.score.size %]
+    <tr>
+      [% SET g = games.score.item(0) %]
+      <th>Highest score</th>
+      <td>[% g.name %]</td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.sc.chunk(-3).join(',') %] points</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+  </tbody>
+
+</table>
+
+[% END %]
+
 </main>
 
 </body>
