@@ -6,10 +6,12 @@ body {
   margin: 0;
 }
 
+/*--- header ----------------------------------------------------------------*/
+
 div.header {
   background-color: #444;
   margin: 0;
-  padding: 1rem;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -36,6 +38,20 @@ h2 {
   font-family: 'Paytone One', cursive;
   color: #444;
 }
+
+div.header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+div.header a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 20%;
+  text-underline-offset: 20%;
+  color: inherit;
+}
+
+/*--- main ------------------------------------------------------------------*/
 
 main {
   padding: 1em 4em 4em 4em;

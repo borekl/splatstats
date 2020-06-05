@@ -1,0 +1,25 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <title>TeamSplat Statistics :: [% player %]</title>
+  <link rel="stylesheet" href="default.css" type="text/css">
+</head>
+
+<body>
+
+<div class="header">
+  <h1>[% player %]</h1>
+  <h3><a href="./">TEAMSPLAT</a></h3>
+</div>
+
+<main>
+
+
+
+</main>
+
+</body>
+
+</html>

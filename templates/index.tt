@@ -11,7 +11,7 @@
 
 <div class="header">
   <h1>TeamSplat Statistics</h1>
-  <h3>DCSS Tournament 0.25</h3>
+  <h3><a href="https://crawl.develz.org/tournament/0.25/">DCSS Tournament 0.25</a></h3>
 </div>
 
 <main>
@@ -34,7 +34,7 @@
   <tbody>
     [% FOR pl IN cfg.match.members.sort %]
       <tr>
-        <td>[% pl %]</td>
+        <td><a href="[% pl %].html">[% pl %]</a></td>
         <td class="numeric">[% games.by_players.item(pl).size %]</td>
         <td class="numeric">[% wins.by_players.item(pl).size %]</td>
         <td>

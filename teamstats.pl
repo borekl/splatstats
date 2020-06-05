@@ -370,6 +370,13 @@ $tt->process(
   'index.html'
 ) or die;
 
+foreach my $pl (@{$cfg->{match}{members}}) {
+  $tt->process(
+    'player.tt',
+    { player => $pl },
+    "$pl.html"
+  ) or die;
+}
 
 #=== save state ==============================================================
 
