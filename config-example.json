@@ -6,11 +6,16 @@
 
   "match" : {
     "members" : [
-      "Mandevil", "shummie", "particleface", "BerryKnight", "Helmschank",
-      "fearitself"
+      "Mandevil", "shummie", "danielguo94", "BerryKnight", "Helmschank",
+      "particleface"
     ],
     "start" : "2019-10-25T20:00:00Z",
-    "end"   : "2019-11-10T20:00:00Z"
+    "end" : "2019-11-10T20:00:00Z"
+  },
+
+  "web" : {
+    "clanrecent" : 20,
+    "plrrecent" : 10
   },
 
   "servers" : {
@@ -23,7 +28,10 @@
       "milestones" : {
         "url" : "http://crawl.akrasiac.org/milestones24",
         "file" : "log.cao.24.milestones"
-      }
+      },
+      "morgue" : "http://crawl.akrasiac.org/rawdata/%u/morgue-%u-%d.txt",
+      "dump" : "http://crawl.akrasiac.org/rawdata/%u/%u.txt",
+      "watch" : "http://crawl.akrasiac.org:8080/#watch-%u.txt"
     },
 
     "cbro" : {
@@ -34,7 +42,10 @@
       "milestones" : {
         "url" : "http://crawl.berotato.org/crawl/meta/0.24/milestones",
         "file" : "log.cbro.24.milestones"
-      }
+      },
+      "morgue" : "http://crawl.berotato.org/crawl/morgue/%u/morgue-%u-%d.txt",
+      "dump" : "http://crawl.berotato.org/crawl/morgue/%u/%u.txt",
+      "watch" : "http://crawl.berotato.org:8080/#watch-%u"
     },
 
     "cko" : {
@@ -45,7 +56,10 @@
       "milestones" : {
         "url" : "https://crawl.kelbi.org/crawl/meta/0.24/milestones",
         "file" : "log.cko.24.milestones"
-      }
+      },
+      "morgue" : "https://crawl.kelbi.org/crawl/morgue/%u/morgue-%u-%d.txt",
+      "dump" : "https://crawl.kelbi.org/crawl/morgue/%u/%u.txt",
+      "watch" : "https://crawl.kelbi.org/#watch-%u"
     },
 
     "cue" : {
@@ -56,7 +70,10 @@
       "milestones" : {
         "url" : "https://underhound.eu/crawl/meta/0.24/milestones",
         "file" : "log.cue.24.milestones"
-      }
+      },
+      "morgue" : "https://underhound.eu/crawl/morgue/%u/morgue-%u-%d.txt",
+      "dump" : "https://underhound.eu/crawl/morgue/%u/%u.txt",
+      "watch" : "http://www.underhound.eu/#watch-%u"
     }
   }
 
