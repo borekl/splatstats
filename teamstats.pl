@@ -10,6 +10,7 @@ use Time::Moment;
 use Try::Tiny;
 use Template;
 use Getopt::Long;
+use Data::Dumper;
 
 
 #=== globals =================================================================
@@ -21,6 +22,7 @@ my $cfg;
 #=== command line options ====================================================
 
 my $cmd_retrieve = 1;           # retrieve remote logs
+my $cmd_debug = 0;              # debug mode
 
 
 #=== aux functions ===========================================================
@@ -104,7 +106,10 @@ sub dump_url
 
 #=== command-line processing ==================================================
 
-GetOptions('retrieve!' => \$cmd_retrieve);
+GetOptions(
+  'retrieve!' => \$cmd_retrieve,
+  'debug!' => \$cmd_debug
+);
 
 
 #=== load configuration =======================================================
@@ -347,6 +352,9 @@ $data{games}{by_players} = \%games_by_players;
 $data{wins}{by_players} = \%wins_by_players;
 $data{servers}{by_players} = \%servers_by_players;
 $data{player_dumps} = \%player_dumps;
+
+path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
+
 
 #=== generate HTML pages =====================================================
 
