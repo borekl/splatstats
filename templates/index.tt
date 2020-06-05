@@ -10,7 +10,7 @@
 <body>
 
 <div class="header">
-  <h1>TeamSplat Statistics</h1>
+  <h1><a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html">TeamSplat Statistics</a></h1>
   <h3><a href="https://crawl.develz.org/tournament/0.25/">DCSS Tournament 0.25</a></h3>
 </div>
 
@@ -28,7 +28,6 @@
       <th>player</th>
       <th>games</th>
       <th>wins</th>
-      <th>dumps</th>
     </tr>
   </thead>
   <tbody>
@@ -37,15 +36,6 @@
         <td><a href="[% pl %].html">[% pl %]</a></td>
         <td class="numeric">[% games.by_players.item(pl).size %]</td>
         <td class="numeric">[% wins.by_players.item(pl).size %]</td>
-        <td>
-          [% FOR srv IN servers.by_players.item(pl) %]
-            [% IF player_dumps.item(pl).item(srv) %]
-              <a href="[% player_dumps.item(pl).item(srv) %]">[% srv.upper %]</a>
-            [% ELSE %]
-              [% srv.upper %]
-            [% END %]
-          [% END %]
-        </td>
       </tr>
     [% END %]
   </tbody>
@@ -68,7 +58,7 @@
       <th>runes</th>
       <th>milestone</th>
       <th>last seen</th>
-      <th>srv</th>
+      <th colspan="3">srv</th>
     </tr>
   </thead>
 
@@ -87,6 +77,20 @@
         <td>[% ms.milestone %]</td>
         <td class="numeric">[% ms.time_from_now_fmt %] ago</td>
         <td>[% ms.server.upper %]</td>
+        <td>
+          [% IF player_dumps.item(ms.name).item(ms.server) %]
+            <a
+              target="_blank"
+              href="[% player_dumps.item(ms.name).item(ms.server)%]">D</a>
+          [% END %]
+        </td>
+        <td>
+          [% IF players.item(ms.name).watchurl.item(ms.server) %]
+            <a
+              target="_blank"
+              href="[% players.item(ms.name).watchurl.item(ms.server) %]">W</a>
+          [% END %]
+        </td>
       </tr>
     [% END %]
   </tbody>
