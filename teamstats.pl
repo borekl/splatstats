@@ -274,35 +274,47 @@ foreach my $g (@{$games}) {
 
 #--- last milestone per (player, server)
 
-my %last_milestones;
-
 foreach my $ms (sort { $a->{time_epoch} <=> $b->{time_epoch} } @$milestones) {
-  $last_milestones{$ms->{name}}{$ms->{server}} = $ms;
+  $data{players}{$ms->{name}}{last_milestones}{$ms->{server}} = $ms;
 }
-
-$data{players}{lastms} = \%last_milestones;
 
 #--- in progress games
 
 # to get games in progress, we scan the last milestone per (player, server)
 # found in the previous step and see if there's corresponding game in the games
 # log; if there isn't, the milestone belongs to an unfinished, on-going game
+#
+# The result of this code is stored in "clan.in_progress" and
+# "player.PLR.in_progress". The stored entities are references to the last
+# milestone entries of ongoing games.
 
-my @in_progress;
+my @clan_in_progress;
 
-foreach my $player (keys %last_milestones) {
-  foreach my $srv (keys %{$last_milestones{$player}}) {
-    my $ms = $last_milestones{$player}{$srv};
+foreach my $pl (keys %{$data{players}}) {
+  next if !exists $data{players}{$pl}{last_milestones};
+  my @plr_in_progress;
+  foreach my $srv (keys %{$data{players}{$pl}{last_milestones}}) {
+    my $ms = $data{players}{$pl}{last_milestones}{$srv};
     if(!exists $games_by_start->{$ms->{start}}) {
-      push(@in_progress, $ms);
+      push(@plr_in_progress, $ms);
+      push(@clan_in_progress, $ms);
     }
   }
+  if(@plr_in_progress) {
+    @plr_in_progress = sort {
+      $a->{time_from_now} <=> $b->{time_from_now}
+    } @plr_in_progress;
+  }
+  $data{players}{$pl}{in_progress} = \@plr_in_progress;
 }
 
-@in_progress = sort {
-  $a->{time_from_now} <=> $b->{time_from_now}
-} @in_progress;
-$data{clan}{in_progress} = \@in_progress;
+if(@clan_in_progress) {
+  @clan_in_progress = sort {
+    $a->{time_from_now} <=> $b->{time_from_now}
+  } @clan_in_progress;
+}
+
+$data{clan}{in_progress} = \@clan_in_progress;
 
 #--- generate list of games, milestones and used servers by players
 
@@ -371,9 +383,10 @@ $tt->process(
 ) or die;
 
 foreach my $pl (@{$cfg->{match}{members}}) {
+  $data{player} = $pl;
   $tt->process(
     'player.tt',
-    { player => $pl },
+    \%data,
     "$pl.html"
   ) or die;
 }

@@ -17,6 +17,44 @@
 <main>
 
 
+<h2>Games In Progress</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>player</th>
+      <th>char</th>
+      <th>place</th>
+      <th>xl</th>
+      <th>runes</th>
+      <th>milestone</th>
+      <th>last seen</th>
+      <th>srv</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% IF !players.item(player).in_progress.size %]
+      <tr><td colspan="9">no games in progress</td></tr>
+    [% END %]
+    [% SET i = 1; FOR ms IN players.item(player).in_progress %]
+      <tr>
+        <td>[% i; SET i = i + 1 %]</td>
+        <td>[% ms.name %]</td>
+        <td>[% ms.char %][% IF ms.god %] of [% ms.god %][% END %]</td>
+        <td>[% ms.place %]</td>
+        <td class="numeric">[% ms.xl %]</td>
+        <td class="numeric">[% ms.urune %]</td>
+        <td>[% ms.milestone %]</td>
+        <td class="numeric">[% ms.time_from_now_fmt %] ago</td>
+        <td>[% ms.server.upper %]</td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+
 
 </main>
 
