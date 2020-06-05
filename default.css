@@ -46,7 +46,7 @@ div.header a {
 
 div.header a:hover {
   text-decoration: underline;
-  text-decoration-thickness: 20%;
+  text-decoration-thickness: 5px;
   text-underline-offset: 20%;
   color: inherit;
 }
