@@ -88,13 +88,13 @@ sub morgue_url
 }
 
 # in-progress dump
-sub dump_url
+sub server_url
 {
-  my ($player, $server) = @_;
+  my ($server, $item, $player) = @_;
 
   # return undef if dump URL is not defined
-  return undef if !exists $cfg->{servers}{$server}{dump};
-  my $template = $cfg->{servers}{$server}{dump};
+  return undef if !exists $cfg->{servers}{$server}{$item};
+  my $template = $cfg->{servers}{$server}{$item};
 
   # perform token replacement
   $template =~ s/%u/$player/g;
@@ -390,8 +390,12 @@ foreach my $plr (@{$cfg->{match}{members}}) {
   $servers_by_players{$plr} = [ sort {
     $servers_by_players{$plr}{$b} cmp $servers_by_players{$plr}{$a}
   } keys %{$servers_by_players{$plr}} ];
+
   foreach my $server (@{$servers_by_players{$plr}}) {
-    $player_dumps{$plr}{$server} = dump_url($plr, $server);
+    $player_dumps{$plr}{$server} = server_url($server, 'dump', $plr);
+
+    $data{players}{$plr}{watchurl}{$server}
+    = server_url($server, 'watch', $plr);
   }
 }
 
