@@ -55,6 +55,112 @@
 </table>
 
 
+[% IF players.item(player).won.size %]
+
+<h2>Won Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>species</th>
+      <th>background</th>
+      <th>god</th>
+      <th>title</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [% SET i = players.item(player).won.size;
+       FOR g IN players.item(player).won.reverse %]
+    <tr class="won">
+      <td class="numeric">[% i; SET i = i - 1 %]</td>
+      <td class="numeric">
+        [% IF g.dumpurl %]
+          <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+        [% ELSE %]
+          [% g.sc.chunk(-3).join(',') %]
+        [% END %]
+      </td>
+      <td>[% g.name %]</td>
+      <td>[% g.race %]</td>
+      <td>[% g.cls %]</td>
+      <td>[% g.god %]</td>
+      <td>[% g.title %]</td>
+      <td class="numeric">[% g.xl %]</td>
+      <td class="numeric">[% g.turn %]</td>
+      <td class="numeric">[% g.dur_fmt %]</td>
+      <td class="numeric">[% g.urune %]</td>
+      <td>[% g.end_fmt %]</td>
+    </tr>
+    [% END %]
+  </tbody>
+</table>
+
+[% END %]
+
+[%# ======================================================================== %]
+[%# === RECENT GAMES ======================================================= %]
+[%# ======================================================================== %]
+
+[% IF clan.recent.size %]
+
+<h2>Recent Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>char</th>
+      <th>place</th>
+      <th>death</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [% SET i = players.item(player).games.size; SET lim = cfg.web.plrrecent %]
+    [% FOR g IN players.item(player).games.reverse %]
+      <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
+        <td class="numeric">[% i; SET i = i - 1 %]</td>
+        <td class="numeric">
+          [% IF g.dumpurl %]
+            <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+          [% ELSE %]
+            [% g.sc.chunk(-3).join(',') %]
+          [% END %]
+        </td>
+        <td>[% g.name %]</td>
+        <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
+        <td>[% g.place %]</td>
+        <td>[% g.tmsg %]</td>
+        <td class="numeric">[% g.xl %]</td>
+        <td class="numeric">[% g.turn %]</td>
+        <td class="numeric">[% g.dur_fmt %]</td>
+        <td class="numeric">[% g.urune %]</td>
+        <td>[% g.end_fmt %]</td>
+      </tr>
+      [% SET lim = lim - 1; LAST IF lim <= 0 %]
+    [% END %]
+  </tbody>
+</table>
+
+[% END %]
 
 </main>
 

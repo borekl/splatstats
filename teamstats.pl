@@ -265,6 +265,41 @@ my @won = sort {
 
 $data{clan}{won} = \@won;
 
+#--- list of won/all player games ---------------------------------------------
+
+foreach my $pl (@{$cfg->{match}{members}}) {
+
+  $data{players}{$pl}{won} = [
+    sort {
+      $a->{end_epoch} <=> $b->{end_epoch}
+    } grep {
+      $_->{ktyp} eq 'winning'
+      && $_->{name} eq $pl
+    } @{$games}
+  ];
+
+  $data{players}{$pl}{games} = [
+    sort {
+      $a->{end_epoch} <=> $b->{end_epoch}
+    } grep {
+      $_->{name} eq $pl
+    } @{$games}
+  ];
+
+}
+
+#--- recent clan games -------------------------------------------------------
+
+if(@{$games} <= $cfg->{web}{clanrecent}) {
+  $data{clan}{recent} = [ sort {
+    $b->{end_epoch} <=> $a->{end_epoch}
+  } @{$games} ];
+} else {
+  $data{clan}{recent} = [ ( sort {
+    $b->{end_epoch} <=> $a->{end_epoch}
+  } @{$games} )[0..$cfg->{web}{clanrecent}] ];
+}
+
 #--- create index of games by "start" field
 
 my $games_by_start = $data{games}{by_start} = {};
