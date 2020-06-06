@@ -192,11 +192,11 @@ if($cmd_retrieve) {
         next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
 
         # convert dates into epoch/human readble format and match time bracket
+        my $tm_start = to_moment($row{start});
+        $row{start_epoch} = $tm_start->epoch;
+        next if $tm_start < $cfg->{match}{start};
+        $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
         if($log eq 'log') {
-          my $tm_start = to_moment($row{start});
-          next if $tm_start < $cfg->{match}{start};
-          $row{start_epoch} = $tm_start->epoch;
-          $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
           my $tm_end = to_moment($row{end});
           last if $tm_end >= $cfg->{match}{end};
           $row{end_epoch} = $tm_end->epoch;
