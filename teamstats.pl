@@ -261,7 +261,7 @@ my @won = sort {
   $a->{end_epoch} <=> $b->{end_epoch}
 } grep {
   $_->{ktyp} eq 'winning'
-} @{$games};
+} @$games;
 
 $data{clan}{won} = \@won;
 
@@ -275,7 +275,7 @@ foreach my $pl (@{$cfg->{match}{members}}) {
     } grep {
       $_->{ktyp} eq 'winning'
       && $_->{name} eq $pl
-    } @{$games}
+    } @$games
   ];
 
   $data{players}{$pl}{games} = [
@@ -283,7 +283,7 @@ foreach my $pl (@{$cfg->{match}{members}}) {
       $a->{end_epoch} <=> $b->{end_epoch}
     } grep {
       $_->{name} eq $pl
-    } @{$games}
+    } @$games
   ];
 
 }
@@ -293,11 +293,10 @@ foreach my $pl (@{$cfg->{match}{members}}) {
 if(@{$games} <= $cfg->{web}{clanrecent}) {
   $data{clan}{recent} = [ sort {
     $b->{end_epoch} <=> $a->{end_epoch}
-  } @{$games} ];
+  } @$games ];
 } else {
   $data{clan}{recent} = [ ( sort {
     $b->{end_epoch} <=> $a->{end_epoch}
-  } @{$games} )[0..$cfg->{web}{clanrecent}] ];
 }
 
 #--- create index of games by "start" field
@@ -305,6 +304,7 @@ if(@{$games} <= $cfg->{web}{clanrecent}) {
 my $games_by_start = $data{games}{by_start} = {};
 foreach my $g (@{$games}) {
   $games_by_start->{$g->{start}} = $g;
+  } @$games )[0..$cfg->{web}{clanrecent}] ];
 }
 
 #--- last milestone per (player, server)
