@@ -280,6 +280,46 @@
       </td>
     </tr>
     [% END %]
+    [% IF games.xlwins.size %]
+    <tr>
+      [% SET g = games.xlwins.item(0) %]
+      <th>Lowest XL win</th>
+      <td>[% g.name %]</td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.xl %] XL and [% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+    [% IF games.xlrunes.size %]
+    <tr>
+      [% SET m = games.xlrunes.item(0) %]
+      <th>Lowest XL rune</th>
+      <td>[% m.name %]</td>
+      <td>
+        [% m.char %]
+        [% IF m.god %] of [% m.god %][% END %]
+      </td>
+      <td>
+        [% mt = m.milestone.match('\b(\w+\srune)\b'); mt.0 %]
+        at [% m.xl %] XL and [% m.turn %] turns
+      </td>
+      <td>
+        [% IF games.by_start.item(m.start_epoch) %]
+          [% SET g = games.by_start.item(m.start_epoch) %]
+          [% IF g.dumpurl %]
+            <a href="[% g.dumpurl %]">dump</a>
+          [% END %]
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
   </tbody>
 
 </table>

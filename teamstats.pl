@@ -431,6 +431,35 @@ $data{games}{score} = [
   } @$games
 ];
 
+#--- wins by xl --------------------------------------------------------------
+
+$data{games}{xlwins} = [
+  sort {
+    if($a->{xl} == $b->{xl}) {
+      $a->{turn} <=> $b->{turn}
+    } else {
+      $a->{xl} <=> $b->{xl}
+    }
+  } grep {
+    $_->{ktyp} eq 'winning'
+  } @$games
+];
+
+#--- first runes by xl -------------------------------------------------------
+
+$data{games}{xlrunes} = [
+  sort {
+    if($a->{xl} == $b->{xl}) {
+      $a->{turn} <=> $b->{turn}
+    } else {
+      $a->{xl} <=> $b->{xl}
+    }
+  } grep {
+    $_->{type} eq 'rune'
+    && $_->{urune} == 1
+  } @$milestones
+];
+
 #--- debug output ------------------------------------------------------------
 
 path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
