@@ -255,6 +255,12 @@ my %data = (
 my $games = $state->{games};
 my $milestones = $state->{milestones};
 
+#--- list of games indexed by start time -------------------------------------
+
+foreach my $g (@$games) {
+  $data{games}{by_start}{$g->{start_epoch}} = $g;
+}
+
 #--- list of won clan games --------------------------------------------------
 
 my @won = sort {
@@ -297,13 +303,6 @@ if(@{$games} <= $cfg->{web}{clanrecent}) {
 } else {
   $data{clan}{recent} = [ ( sort {
     $b->{end_epoch} <=> $a->{end_epoch}
-}
-
-#--- create index of games by "start" field
-
-my $games_by_start = $data{games}{by_start} = {};
-foreach my $g (@{$games}) {
-  $games_by_start->{$g->{start}} = $g;
   } @$games )[0..$cfg->{web}{clanrecent}] ];
 }
 
@@ -330,7 +329,7 @@ foreach my $pl (keys %{$data{players}}) {
   my @plr_in_progress;
   foreach my $srv (keys %{$data{players}{$pl}{last_milestones}}) {
     my $ms = $data{players}{$pl}{last_milestones}{$srv};
-    if(!exists $games_by_start->{$ms->{start}}) {
+    if(!exists $data{games}{by_start}{$ms->{start_epoch}}) {
       push(@plr_in_progress, $ms);
       push(@clan_in_progress, $ms);
     }
