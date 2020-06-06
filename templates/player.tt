@@ -161,7 +161,7 @@
         </td>
         <td>[% g.name %]</td>
         <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
-        <td>[% g.place %]</td>
+        <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
         <td>[% g.tmsg %]</td>
         <td class="numeric">[% g.xl %]</td>
         <td class="numeric">[% g.turn %]</td>
