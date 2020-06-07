@@ -209,11 +209,16 @@
 
 [% END %]
 
+<div class="flexrow">
+
+
 [%# ======================================================================== %]
 [%# === CLAN BEST ========================================================== %]
 [%# ======================================================================== %]
 
 [% IF clan.won.size %]
+
+<div>
 <h2>Clan's Best Games</h2>
 
 <table>
@@ -255,7 +260,7 @@
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
       </td>
-      <td>[% g.dur_fmt %]</td>
+      <td>[% g.dur_fmt %] at [% g.turn %] turns</td>
       <td>
         [% IF g.dumpurl %]
         <a href="[% g.dumpurl %]">dump</a>
@@ -272,7 +277,7 @@
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
       </td>
-      <td>[% g.sc.chunk(-3).join(',') %] points</td>
+      <td>[% g.sc.chunk(-3).join(',') %] points at [% g.turn %] turns</td>
       <td>
         [% IF g.dumpurl %]
         <a href="[% g.dumpurl %]">dump</a>
@@ -289,7 +294,7 @@
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
       </td>
-      <td>[% g.xl %] XL and [% g.turn %] turns</td>
+      <td>[% g.xl %] XL at [% g.turn %] turns</td>
       <td>
         [% IF g.dumpurl %]
         <a href="[% g.dumpurl %]">dump</a>
@@ -324,7 +329,133 @@
 
 </table>
 
+</div>
+
 [% END %]
+
+
+[%# ======================================================================== %]
+[%# === RUNES COLLECTION =================================================== %]
+[%# ======================================================================== %]
+
+<div>
+
+<h2>Runes Progress</h2>
+
+<table class="runes">
+  <tbody>
+    <tr>
+      <td[% IF clan.runes.exists('decaying') %] class="found"[% END %]>decaying</td>
+      <td[% IF clan.runes.exists('gossamer') %] class="found"[% END %]>gossamer</td>
+      <td[% IF clan.runes.exists('serpentine') %] class="found"[% END %]>serpentine</td>
+    </tr>
+    <tr>
+      <td[% IF clan.runes.exists('barnacled') %] class="found"[% END %]>barnacled</td>
+      <td[% IF clan.runes.exists('silver') %] class="found"[% END %]>silver</td>
+      <td[% IF clan.runes.exists('abyssal') %] class="found"[% END %]>abyssal</td>
+    </tr>
+    <tr>
+      <td[% IF clan.runes.exists('slimy') %] class="found"[% END %]>slimy</td>
+      <td[% IF clan.runes.exists('demonic') %] class="found"[% END %]>demonic</td>
+      <td[% IF clan.runes.exists('magical') %] class="found"[% END %]>magical</td>
+    </tr>
+    <tr>
+      <td[% IF clan.runes.exists('glowing') %] class="found"[% END %]>glowing</td>
+      <td[% IF clan.runes.exists('dark') %] class="found"[% END %]>dark</td>
+      <td[% IF clan.runes.exists('fiery') %] class="found"[% END %]>fiery</td>
+    </tr>
+    <tr>
+      <td[% IF clan.runes.exists('iron') %] class="found"[% END %]>iron</td>
+      <td[% IF clan.runes.exists('icy') %] class="found"[% END %]>icy</td>
+      <td[% IF clan.runes.exists('obsidian') %] class="found"[% END %]>obsidian</td>
+    </tr>
+    <tr>
+      <td[% IF clan.runes.exists('bone') %] class="found"[% END %]>bone</td>
+      <td[% IF clan.runes.exists('golden') %] class="found"[% END %]>golden</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+</div>
+
+[%# ======================================================================== %]
+[%# === GODS =============================================================== %]
+[%# ======================================================================== %]
+
+<h2>Gods: Maximum Piety</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size - 3; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %] 
+    <td[% IF clan.godpiety.exists(god) %] class="found"[% END %]>[% god %]</td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+<h2>Gods: Wins</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% IF !god; SET god = 'No god'; END %]
+    <td[% IF clan.godwin.exists(god) %] class="found"[% END %]>
+      [% god %]
+    </td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+[%# ======================================================================== %]
+[%# === UNIQUES HARVEST ==================================================== %]
+[%# ======================================================================== %]
+
+<h2>Uniques</h2>
+
+<table class="uniques">
+
+<tbody>
+  
+<tr>
+[%
+  SET cnt = cfg.game.uniques.size;
+  SET rowcnt = 5; FOR u IN cfg.game.uniques
+%]
+  <td[% IF clan.uniques.exists(u); ' class="found"'; END %]>[% u %]</td>
+  [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+  [% LAST IF cnt == 0 %]
+  [% IF rowcnt == 0; rowcnt = 5; "</tr></tr>"; END %]
+[% END %]
+  <td class="summary" colspan="[% rowcnt %]">
+    [% clan.uniques.keys.size %]
+    out of
+    [% cfg.game.uniques.size %]
+    killed
+  </td>
+</tr>
+
+</tbody>
+
+</table>
 
 </main>
 

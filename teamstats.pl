@@ -103,6 +103,72 @@ sub server_url
   return $template;
 }
 
+# check if given game reached maxpiety with the winning deity; this is the
+# requirement for a game to count as "won with god" (excluding Xom/Gozag)
+
+sub check_god_maxpiety
+{
+  my $data = shift;
+  my $g = shift;
+  my $god = $g->{god};
+
+  if(
+    grep {
+      $_->{start_epoch} == $g->{start_epoch}
+      && $_->{type} eq 'god.maxpiety'
+    } @{$data->{milestones}}
+  ) {
+    return 1;
+  } else {
+    return undef;
+  }
+}
+
+# check if given god was the only god worshipped in the game; this is the
+# requirement for a game to count as won with either Xom or Gozag
+
+sub check_god_exclusivity
+{
+  my $data = shift;
+  my $g = shift;
+  my $god = $g->{god};
+
+  if(
+    grep {
+      $_->{start_epoch} == $g->{start_epoch}
+      && $_->{type} =~ /^god\./
+      && $_->{god} ne $god
+    } @{$data->{milestones}}
+  ) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+# check if given game is atheist
+
+sub check_atheist
+{
+  my $data = shift;
+  my $g = shift;
+
+  # some shortcuts can be made
+  return 0 if $g->{cls} eq 'Berserker' || $g->{cls} eq 'Chaos Knight';
+  return 1 if $g->{race} eq 'Demigod';
+
+  if(
+    grep {
+      $_->{start_epoch} == $g->{start_epoch}
+      && $g->{type} =~ /^god\./
+    } @{$data->{milestones}}
+  ) {
+    return 0
+  } else {
+    return 1
+  }
+}
+
 
 #=== command-line processing ==================================================
 
@@ -459,6 +525,68 @@ $data{games}{xlrunes} = [
     && $_->{urune} == 1
   } @$milestones
 ];
+
+#--- runes -------------------------------------------------------------------
+
+# runes collection status, both for individual players and clan as a whole
+
+foreach my $ms (@$milestones) {
+  next if $ms->{type} ne 'rune';
+  $ms->{milestone} =~ /\b(\w+)\srune\b/;
+  my $rune = $1;
+  $data{clan}{runes}{$rune}++;
+  $data{players}{$ms->{name}}{runes}{$rune}++;
+}
+
+#--- uniques -----------------------------------------------------------------
+
+# uniques harvest sttus, both for individual players and clan as a whole
+
+foreach my $ms (@$milestones) {
+  next if $ms->{type} ne 'uniq';
+  my $msg = $ms->{milestone};
+  $msg =~ s/\d+-headed\s//;
+  $msg =~ s/Royal Jelly/royal jelly/;
+  $msg =~ /killed\s(.*)$/;
+  my $unique = $1;
+  next if !$unique;
+  $data{clan}{uniques}{$unique}++;
+  $data{players}{$ms->{name}}{uniques}{$unique}++;
+}
+
+#--- god maxpiety ------------------------------------------------------------
+
+foreach my $ms (@$milestones) {
+  next if $ms->{type} ne 'god.maxpiety';
+  $data{clan}{godpiety}{$ms->{god}}++;
+  $data{players}{$ms->{name}}{godpiety}{$ms->{god}}++;
+}
+
+#--- god won -----------------------------------------------------------------
+
+# Xom and Gozag are won only when the player never worships any other god.
+# Other gods are won when player reaches 6* piety and then wins
+
+foreach my $g (@$games) {
+  next if $g->{ktyp} ne 'winning';
+  my $god = $g->{god};
+  if(!$god) {
+    if(check_atheist(\%data, $g)) {
+      $data{clan}{godwin}{'No god'}++;
+      $data{players}{$g->{name}}{godwin}{'No god'}++;
+    }
+  } elsif($god eq 'Xom' || $god eq 'Gozag') {
+    if(check_god_exclusivity(\%data, $g)) {
+      $data{clan}{godwin}{$god}++;
+      $data{players}{$g->{name}}{godwin}{$god}++;
+    }
+  } else {
+    if(check_god_maxpiety(\%data, $g)) {
+      $data{clan}{godwin}{$god}++;
+      $data{players}{$g->{name}}{godwin}{$god}++;
+    }
+  }
+}
 
 #--- debug output ------------------------------------------------------------
 

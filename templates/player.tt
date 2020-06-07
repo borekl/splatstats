@@ -176,6 +176,123 @@
 
 [% END %]
 
+[%# ======================================================================== %]
+[%# === RUNES COLLECTION =================================================== %]
+[%# ======================================================================== %]
+
+<h2>Runes Progress</h2>
+
+<table class="runes">
+  <tbody>
+    <tr>
+      <td[% IF players.item(player).runes.exists('decaying') %] class="found"[% END %]>decaying</td>
+      <td[% IF players.item(player).runes.exists('gossamer') %] class="found"[% END %]>gossamer</td>
+      <td[% IF players.item(player).runes.exists('serpentine') %] class="found"[% END %]>serpentine</td>
+    </tr>
+    <tr>
+      <td[% IF players.item(player).runes.exists('barnacled') %] class="found"[% END %]>barnacled</td>
+      <td[% IF players.item(player).runes.exists('silver') %] class="found"[% END %]>silver</td>
+      <td[% IF players.item(player).runes.exists('abyssal') %] class="found"[% END %]>abyssal</td>
+    </tr>
+    <tr>
+      <td[% IF players.item(player).runes.exists('slimy') %] class="found"[% END %]>slimy</td>
+      <td[% IF players.item(player).runes.exists('demonic') %] class="found"[% END %]>demonic</td>
+      <td[% IF players.item(player).runes.exists('magical') %] class="found"[% END %]>magical</td>
+    </tr>
+    <tr>
+      <td[% IF players.item(player).runes.exists('glowing') %] class="found"[% END %]>glowing</td>
+      <td[% IF players.item(player).runes.exists('dark') %] class="found"[% END %]>dark</td>
+      <td[% IF players.item(player).runes.exists('fiery') %] class="found"[% END %]>fiery</td>
+    </tr>
+    <tr>
+      <td[% IF players.item(player).runes.exists('iron') %] class="found"[% END %]>iron</td>
+      <td[% IF players.item(player).runes.exists('icy') %] class="found"[% END %]>icy</td>
+      <td[% IF players.item(player).runes.exists('obsidian') %] class="found"[% END %]>obsidian</td>
+    </tr>
+    <tr>
+      <td[% IF players.item(player).runes.exists('bone') %] class="found"[% END %]>bone</td>
+      <td[% IF players.item(player).runes.exists('golden') %] class="found"[% END %]>golden</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+[%# ======================================================================== %]
+[%# === GODS =============================================================== %]
+[%# ======================================================================== %]
+
+<h2>Gods: Maximum Piety</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size - 3; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %] 
+    <td[% IF players.item(player).godpiety.exists(god) %] class="found"[% END %]>[% god %]</td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+<h2>Gods: Wins</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% IF !god; SET god = 'No god'; END %]
+    <td[% IF players.item(player).godwin.exists(god) %] class="found"[% END %]>
+      [% god %]
+    </td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+[%# ======================================================================== %]
+[%# === UNIQUES HARVEST ==================================================== %]
+[%# ======================================================================== %]
+
+<h2>Uniques</h2>
+
+<table class="uniques">
+
+<tbody>
+  
+<tr>
+[%
+  SET cnt = cfg.game.uniques.size;
+  SET rowcnt = 5; FOR u IN cfg.game.uniques
+%]
+  <td[% IF players.item(player).uniques.exists(u); ' class="found"'; END %]>[% u %]</td>
+  [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+  [% LAST IF cnt == 0 %]
+  [% IF rowcnt == 0; rowcnt = 5; "</tr></tr>"; END %]
+[% END %]
+  <td class="summary" colspan="[% rowcnt %]">
+    [% players.item(player).uniques.keys.size %]
+    out of
+    [% cfg.game.uniques.size %]
+    killed
+  </td>
+</tr>
+
+</tbody>
+
+</table>
+
 </main>
 
 </body>

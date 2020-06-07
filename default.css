@@ -102,3 +102,52 @@ th,td {
   border: 1px solid #ddd;
   padding: 0.4rem;
 }
+
+
+/*--- runes */
+
+table.runes td {
+  font-family: 'Paytone One', cursive;
+  font-size: 100%;
+  text-align: center;
+  color: #bbb;
+  width: 7em;
+}
+
+table.runes td.found {
+  color: #555;
+}
+
+/*--- uniques */
+
+table.uniques td {
+  font-family: 'Paytone One', cursive;
+  font-size: 100%;
+  text-align: center;
+  color: #bbb;
+  width: 11em;
+}
+
+table.uniques td.found {
+  color: #555;
+}
+
+table.uniques td.summary {
+  font-family: inherit;
+  font-size: 75%;
+  color: #999;
+}
+
+/*--- gods */
+
+table.gods td {
+  font-family: 'Paytone One', cursive;
+  font-size: 100%;
+  text-align: center;
+  color: #bbb;
+  width: 10em;
+}
+
+table.gods td.found {
+  color: #555;
+}
