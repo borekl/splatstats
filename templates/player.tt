@@ -122,10 +122,65 @@
 [% END %]
 
 [%# ======================================================================== %]
+[%# === BEST GAMES ========================================================= %]
+[%# ======================================================================== %]
+
+[% IF players.item(player).games.all.size %]
+
+<h2>Best games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>char</th>
+      <th>place</th>
+      <th>death</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [% SET i = 1; SET lim = cfg.web.best %]
+    [% FOR g IN players.item(player).games.by_score %]
+      <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
+        <td class="numeric">[% i; SET i = i + 1 %]</td>
+        <td class="numeric">
+          [% IF g.dumpurl %]
+            <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+          [% ELSE %]
+            [% g.sc.chunk(-3).join(',') %]
+          [% END %]
+        </td>
+        <td>[% g.name %]</td>
+        <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
+        <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
+        <td>[% g.tmsg %]</td>
+        <td class="numeric">[% g.xl %]</td>
+        <td class="numeric">[% g.turn %]</td>
+        <td class="numeric">[% g.dur_fmt %]</td>
+        <td class="numeric">[% g.urune %]</td>
+        <td>[% g.end_fmt %]</td>
+      </tr>
+      [% SET lim = lim - 1; LAST IF lim <= 0 %]
+    [% END %]
+  </tbody>
+</table>
+
+[% END %]
+
+[%# ======================================================================== %]
 [%# === RECENT GAMES ======================================================= %]
 [%# ======================================================================== %]
 
-[% IF clan.recent.size %]
+[% IF players.item(player).games.all.size %]
 
 <h2>Recent Games</h2>
 
@@ -148,8 +203,8 @@
   </thead>
 
   <tbody>
-    [% SET i = players.item(player).games.size; SET lim = cfg.web.plrrecent %]
-    [% FOR g IN players.item(player).games.reverse %]
+    [% SET i = players.item(player).games.all.size; SET lim = cfg.web.plrrecent %]
+    [% FOR g IN players.item(player).games.all.reverse %]
       <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
         <td class="numeric">[% i; SET i = i - 1 %]</td>
         <td class="numeric">
@@ -228,7 +283,7 @@
 
   <tr>
   [% cnt = cfg.game.gods.size - 3; rowcnt = 6; FOR god IN cfg.game.gods %]
-    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %] 
+    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %]
     <td[% IF players.item(player).godpiety.exists(god) %] class="found"[% END %]>[% god %]</td>
     [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
     [% LAST IF cnt == 0 %]
@@ -270,7 +325,7 @@
 <table class="uniques">
 
 <tbody>
-  
+
 <tr>
 [%
   SET cnt = cfg.game.uniques.size;

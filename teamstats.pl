@@ -588,6 +588,24 @@ foreach my $g (@$games) {
   }
 }
 
+#--- best player games -------------------------------------------------------
+
+# initialize the players.PLR.games.all lists
+foreach my $plr (@{$cfg->{match}{members}}) {
+  $data{players}{$plr}{games} = { all => [], by_score => [] };
+}
+
+# create per-player game lists
+foreach my $g (@$games) {
+  push(@{$data{players}{$g->{name}}{games}{all}}, $g);
+}
+
+# sort per-player game lists by score
+foreach my $plr (@{$cfg->{match}{members}}) {
+  $data{players}{$plr}{games}{by_score} =
+  [ sort { $b->{sc} <=> $a->{sc} } @{$data{players}{$plr}{games}{all}} ]
+}
+
 #--- debug output ------------------------------------------------------------
 
 path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
