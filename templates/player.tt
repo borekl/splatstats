@@ -350,6 +350,10 @@
 
 </main>
 
+<div class="footer">
+Generated: [% gentime %] UTC
+</div>
+
 </body>
 
 </html>

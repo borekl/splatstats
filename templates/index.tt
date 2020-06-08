@@ -392,7 +392,7 @@
 
   <tr>
   [% cnt = cfg.game.gods.size - 3; rowcnt = 6; FOR god IN cfg.game.gods %]
-    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %] 
+    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %]
     <td[% IF clan.godpiety.exists(god) %] class="found"[% END %]>[% god %]</td>
     [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
     [% LAST IF cnt == 0 %]
@@ -434,7 +434,7 @@
 <table class="uniques">
 
 <tbody>
-  
+
 <tr>
 [%
   SET cnt = cfg.game.uniques.size;
@@ -458,6 +458,10 @@
 </table>
 
 </main>
+
+<div class="footer">
+Generated: [% gentime %] UTC
+</div>
 
 </body>
 

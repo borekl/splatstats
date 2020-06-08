@@ -151,3 +151,12 @@ table.gods td {
 table.gods td.found {
   color: #555;
 }
+
+/*--- footer */
+
+div.footer {
+  font-size: 75%;
+  color: #bbb;
+  margin: 1em;
+  text-align: center;
+}

@@ -609,6 +609,11 @@ foreach my $plr (@{$cfg->{match}{members}}) {
   [ sort { $b->{sc} <=> $a->{sc} } @{$data{players}{$plr}{games}{all}} ]
 }
 
+#--- auxiliary information
+
+my $now_gen = Time::Moment->now_utc;
+$data{gentime} = $now_gen->strftime('%Y-%m-%d %H:%M:%S');
+
 #--- debug output ------------------------------------------------------------
 
 path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
