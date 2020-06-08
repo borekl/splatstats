@@ -1,0 +1,76 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <title>TeamSplat Statistics</title>
+  <link rel="stylesheet" href="default.css" type="text/css">
+</head>
+
+<body>
+
+<div class="header">
+  <h1>All Teamsplat Games</h1>
+  <h3><a href="./">TEAMSPLAT</a></h3>
+</div>
+
+<main class="single">
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>char</th>
+      <th>title</th>
+      <th>place</th>
+      <th>death</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [% IF !clan.games.size %]
+    <tr><td colspan="12">no games so far</td></tr>
+    [% END %]
+    [% SET i = clan.games.size; FOR g IN clan.games %]
+    <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
+      <td class="numeric">[% i; SET i = i - 1 %]</td>
+      <td class="numeric">
+        [% IF g.dumpurl %]
+          <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+        [% ELSE %]
+          [% g.sc.chunk(-3).join(',') %]
+        [% END %]
+      </td>
+      <td>[% g.name %]</td>
+      <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
+      <td>[% g.title %]</td>
+      <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
+      <td>[% g.tmsg %]</td>
+      <td class="numeric">[% g.xl %]</td>
+      <td class="numeric">[% g.turn %]</td>
+      <td class="numeric">[% g.dur_fmt %]</td>
+      <td class="numeric">[% g.urune %]</td>
+      <td>[% g.end_fmt %]</td>
+    </tr>
+    [% END %]
+  </tbody>
+
+</table>
+
+</main>
+
+<div class="footer">
+Generated: [% gentime %] UTC
+</div>
+
+</body>
+
+</html>

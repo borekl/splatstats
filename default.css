@@ -57,6 +57,10 @@ main {
   padding: 1em 4em 4em 4em;
 }
 
+main.single {
+  margin-top: 2em;
+}
+
 div.flexrow {
   display: flex;
 }
@@ -67,6 +71,10 @@ div.flexrow > div:nth-child(n+2) {
 
 .numeric {
   text-align: right;
+}
+
+.more {
+  text-align: center;
 }
 
 table {

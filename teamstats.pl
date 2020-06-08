@@ -330,6 +330,12 @@ foreach my $g (@$games) {
   $data{games}{by_start}{$g->{start_epoch}} = $g;
 }
 
+#--- list of clan games sorted by end time -----------------------------------
+
+$data{clan}{games} = [
+  sort { $b->{end_epoch} <=> $a->{end_epoch} } @$games
+];
+
 #--- list of won clan games --------------------------------------------------
 
 my @won = sort {
@@ -631,6 +637,12 @@ $tt->process(
   'index.tt',
   \%data,
   'index.html'
+) or die;
+
+$tt->process(
+  'games.tt',
+  \%data,
+  'games.html'
 ) or die;
 
 foreach my $pl (@{$cfg->{match}{members}}) {
