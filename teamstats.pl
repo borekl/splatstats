@@ -203,14 +203,6 @@ if(-f $state_file) {
   $state->{milestones} = [];
 }
 
-
-#=== resolve "now" moment ====================================================
-
-my $now = time();
-my $end_of_tourney = $cfg->{match}{end}->epoch;
-$now = $end_of_tourney if $now > $end_of_tourney;
-
-
 #=== loading of logfiles =====================================================
 
 if($cmd_retrieve) {
@@ -273,8 +265,6 @@ if($cmd_retrieve) {
           next if $tm_time < $cfg->{match}{start};
           last if $tm_time >= $cfg->{match}{end};
           $row{time_epoch} = to_moment($row{time})->epoch;
-          $row{time_from_now} = $now - $row{time_epoch};
-          $row{time_from_now_fmt} = format_duration($row{time_from_now});
           $row{milestone} =~ s/.$//;
         }
 
@@ -320,6 +310,19 @@ my %data = (
 
 my $games = $state->{games};
 my $milestones = $state->{milestones};
+
+#--- resolve "now" moment ----------------------------------------------------
+
+my $now = time();
+my $end_of_tourney = $cfg->{match}{end}->epoch;
+$now = $end_of_tourney if $now > $end_of_tourney;
+
+#--- add 'time_from_now' field to milestones
+
+foreach my $ms (@$milestones) {
+  $ms->{time_from_now} = $now - $ms->{time_epoch};
+  $ms->{time_from_now_fmt} = format_duration($ms->{time_from_now});
+}
 
 #--- list of games indexed by start time -------------------------------------
 
