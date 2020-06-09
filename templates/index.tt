@@ -69,7 +69,7 @@
     [% SET i = 1; FOR ms IN clan.in_progress %]
       <tr>
         <td>[% i; SET i = i + 1 %]</td>
-        <td>[% ms.name %]</td>
+        <td><a href="[% ms.name %].html">[% ms.name %]</a></td>
         <td>[% ms.char %][% IF ms.god %] of [% ms.god %][% END %]</td>
         <td>[% ms.place %]</td>
         <td class="numeric">[% ms.xl %]</td>
@@ -81,14 +81,16 @@
           [% IF player_dumps.item(ms.name).item(ms.server) %]
             <a
               target="_blank"
-              href="[% player_dumps.item(ms.name).item(ms.server)%]">D</a>
+              class="nodecor"
+              href="[% player_dumps.item(ms.name).item(ms.server)%]">📜</a>
           [% END %]
         </td>
         <td>
           [% IF players.item(ms.name).watchurl.item(ms.server) %]
             <a
               target="_blank"
-              href="[% players.item(ms.name).watchurl.item(ms.server) %]">W</a>
+              class="nodecor"
+              href="[% players.item(ms.name).watchurl.item(ms.server) %]">👁️</a>
           [% END %]
         </td>
       </tr>
@@ -137,7 +139,7 @@
           [% g.sc.chunk(-3).join(',') %]
         [% END %]
       </td>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>[% g.race %]</td>
       <td>[% g.cls %]</td>
       <td>[% g.god %]</td>
@@ -192,7 +194,7 @@
           [% g.sc.chunk(-3).join(',') %]
         [% END %]
       </td>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
       <td>[% g.title %]</td>
       <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
@@ -241,7 +243,7 @@
     <tr>
       [% SET g = games.turncount.item(0) %]
       <th>Lowest turncount</th>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
@@ -258,7 +260,7 @@
     <tr>
       [% SET g = games.realtime.item(0) %]
       <th>Fastest realtime</th>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
@@ -275,7 +277,7 @@
     <tr>
       [% SET g = games.score.item(0) %]
       <th>Highest score</th>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
@@ -292,7 +294,7 @@
     <tr>
       [% SET g = games.xlwins.item(0) %]
       <th>Lowest XL win</th>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
         [% g.char %]
         [% IF g.god %] of [% g.god %][% END %]
@@ -309,7 +311,7 @@
     <tr>
       [% SET m = games.xlrunes.item(0) %]
       <th>Lowest XL rune</th>
-      <td>[% m.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
         [% m.char %]
         [% IF m.god %] of [% m.god %][% END %]

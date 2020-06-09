@@ -6,6 +6,35 @@ body {
   margin: 0;
 }
 
+/*--- default links ---------------------------------------------------------*/
+
+a {
+  color: #666;
+  text-decoration-style: dotted;
+}
+
+.won a {
+  color: #000;
+}
+
+a.nodecor {
+  text-decoration: none;
+}
+
+a:visited {
+  color: #666;
+  text-decoration-style: dotted;
+}
+
+.won a:visited {
+  color: #000;
+}
+
+a:hover {
+  color: #222;
+  text-decoration-style: inherit;
+}
+
 /*--- header ----------------------------------------------------------------*/
 
 div.header {

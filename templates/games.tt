@@ -49,7 +49,7 @@
           [% g.sc.chunk(-3).join(',') %]
         [% END %]
       </td>
-      <td>[% g.name %]</td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
       <td>[% g.title %]</td>
       <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
