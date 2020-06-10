@@ -11,8 +11,8 @@
 <body>
 
 <div class="header">
-  <h1>[% player %]</h1>
-  <h3><a href="./">TEAMSPLAT</a></h3>
+  <h1><img class="icon" src="favicon.svg"> [% player %]</h1>
+  <h3 class="uppercase"><a href="./">TEAMSPLAT</a></h3>
 </div>
 
 <main>

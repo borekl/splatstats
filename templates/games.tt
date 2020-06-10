@@ -11,8 +11,8 @@
 <body>
 
 <div class="header">
-  <h1>All Teamsplat Games</h1>
-  <h3><a href="./">TEAMSPLAT</a></h3>
+  <h1><img class="icon" src="favicon.svg"> All Teamsplat Games</h1>
+  <h3 class="uppercase"><a href="./">TEAMSPLAT</a></h3>
 </div>
 
 <main class="single">

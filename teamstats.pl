@@ -615,10 +615,54 @@ foreach my $plr (@{$cfg->{match}{members}}) {
   [ sort { $b->{sc} <=> $a->{sc} } @{$data{players}{$plr}{games}{all}} ]
 }
 
-#--- auxiliary information
+#--- generation time
 
-my $now_gen = Time::Moment->now_utc;
-$data{gentime} = $now_gen->strftime('%Y-%m-%d %H:%M:%S');
+$now = Time::Moment->now_utc;
+$data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
+
+#--- tournament phase and future countdown targets
+
+# following code find at what timepoint in relation to the tournament we are
+# (before, during, after); and also creates a list (@count_to) of future
+# countdown targets; if we are before the tournament, there are two targets
+# (the start and the end), if we are during the tournament, then there is only
+# one (the end); if we are after, there are none
+
+my @count_to;
+
+if($now < $cfg->{match}{start}) {
+  $data{phase} = 'before';
+  @count_to = @{$cfg->{match}}{'start','end'};
+} elsif($cfg->{match}{end} <= $now) {
+  $data{phase} = 'after';
+} else {
+  $data{phase} = 'during';
+  @count_to = ($cfg->{match}{end});
+}
+
+#--- countdown
+
+# format the actual countdown string for server-side rendered countdown and
+# create list of countdown targets (in epoch format) for the front-side
+# countdown JavaScript code
+
+if($data{phase} ne 'after') {
+  my ($dy, $h, $d, $s) = (
+    $now->delta_days($count_to[0]),
+    $now->delta_hours($count_to[0]) % 24,
+    $now->delta_minutes($count_to[0]) % 60,
+    $now->delta_seconds($count_to[0]) % 60,
+  );
+
+  if($dy) {
+    $data{countdown} = sprintf('%dd, %02d:%02d:%02d', $dy, $h, $d, $s);
+  } else {
+    $data{countdown} = sprintf('%02d:%02d:%02d', $h, $d, $s);
+  }
+} else {
+  $data{countdown} = sprintf('%02d:%02d:%02d', 0, 0, 0);
+}
+$data{count_to} = join(',', map { $_->epoch } @count_to);
 
 #--- debug output ------------------------------------------------------------
 

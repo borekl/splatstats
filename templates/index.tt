@@ -6,13 +6,18 @@
   <title>TeamSplat Statistics</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="default.css" type="text/css">
+  <script type="text/javascript" src="countdown.js"></script>
 </head>
 
 <body>
 
 <div class="header">
-  <h1><a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html">TeamSplat Statistics</a></h1>
-  <h3><a href="https://crawl.develz.org/tournament/0.25/">DCSS Tournament 0.25</a></h3>
+  <h1><img class="icon" src="favicon.svg"> <a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html">TeamSplat Statistics</a></h1>
+  <h3
+
+    id="countdown"
+    data-countdown="[% count_to %]"
+  >[% countdown %]</h3>
 </div>
 
 <main>
