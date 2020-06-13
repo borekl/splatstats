@@ -338,7 +338,7 @@
   [% IF rowcnt == 0; rowcnt = 5; "</tr></tr>"; END %]
 [% END %]
   <td class="summary" colspan="[% rowcnt %]">
-    [% players.item(player).uniques.keys.size %]
+    [% players.item(player).uniques.keys.size + 0 %]
     out of
     [% cfg.game.uniques.size %]
     killed
