@@ -54,14 +54,16 @@
           [% IF player_dumps.item(ms.name).item(ms.server) %]
             <a
               target="_blank"
-              href="[% player_dumps.item(ms.name).item(ms.server)%]">D</a>
+              class="nodecor"
+              href="[% player_dumps.item(ms.name).item(ms.server)%]">📜</a>
           [% END %]
         </td>
         <td>
           [% IF players.item(ms.name).watchurl.item(ms.server) %]
             <a
               target="_blank"
-              href="[% players.item(ms.name).watchurl.item(ms.server) %]">W</a>
+              class="nodecor"
+              href="[% players.item(ms.name).watchurl.item(ms.server) %]">👁️</a>
           [% END %]
         </td>
       </tr>
