@@ -559,6 +559,11 @@ foreach my $ms (@$milestones) {
   $msg =~ /killed\s(.*)$/;
   my $unique = $1;
   next if !$unique;
+  # mapping unique names
+  $unique = $cfg->{game}{uniquesmap}{$unique} if (
+    exists $cfg->{game}{uniquesmap}
+    && exists $cfg->{game}{uniquesmap}{$unique}
+  );
   $data{clan}{uniques}{$unique}++;
   $data{players}{$ms->{name}}{uniques}{$unique}++;
 }
