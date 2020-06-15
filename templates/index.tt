@@ -449,7 +449,7 @@
 <tr>
 [%
   SET cnt = cfg.game.uniques.size;
-  SET rowcnt = 5; FOR u IN cfg.game.uniques
+  SET rowcnt = 5; FOR u IN cfg.game.uniques.sort
 %]
   <td[% IF clan.uniques.exists(u); ' class="found"'; END %]>[% u %]</td>
   [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
