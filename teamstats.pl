@@ -163,6 +163,7 @@ sub check_atheist
   if(
     grep {
       $_->{start_epoch} == $g->{start_epoch}
+      && $g->{type}
       && $g->{type} =~ /^god\./
     } @{$data->{milestones}}
   ) {
