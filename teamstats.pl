@@ -154,7 +154,10 @@ sub check_atheist
   my $g = shift;
 
   # some shortcuts can be made
-  return 0 if $g->{cls} eq 'Berserker' || $g->{cls} eq 'Chaos Knight';
+  return 0 if
+    $g->{cls} eq 'Berserker'
+    || $g->{cls} eq 'Chaos Knight'
+    || $g->{cls} eq 'Abyssal Knight';
   return 1 if $g->{race} eq 'Demigod';
 
   if(
