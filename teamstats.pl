@@ -137,7 +137,7 @@ sub check_god_exclusivity
     grep {
       $_->{start_epoch} == $g->{start_epoch}
       && $_->{type} =~ /^god\./
-      && $_->{god} ne $god
+      && ($_->{god} && $_->{god} ne $god)
     } @{$data->{milestones}}
   ) {
     return 0;
