@@ -187,7 +187,8 @@ GetOptions(
 my $config_file = path('config.json');
 $cfg = $js->decode($config_file->slurp_raw);
 
-# convert match.start and match.end values into Time::Moment instances
+# convert tournament.start and tournament.end values into Time::Moment
+# instances
 foreach my $t (qw(start end)) {
   if(exists $cfg->{tournament}{$t}) {
     $cfg->{tournament}{$t} = Time::Moment->from_string($cfg->{tournament}{$t});
