@@ -189,8 +189,8 @@ $cfg = $js->decode($config_file->slurp_raw);
 
 # convert match.start and match.end values into Time::Moment instances
 foreach my $t (qw(start end)) {
-  if(exists $cfg->{match}{$t}) {
-    $cfg->{match}{$t} = Time::Moment->from_string($cfg->{match}{$t});
+  if(exists $cfg->{tournament}{$t}) {
+    $cfg->{tournament}{$t} = Time::Moment->from_string($cfg->{tournament}{$t});
   }
 }
 
@@ -256,18 +256,18 @@ if($cmd_retrieve) {
         # convert dates into epoch/human readble format and match time bracket
         my $tm_start = to_moment($row{start});
         $row{start_epoch} = $tm_start->epoch;
-        next if $tm_start < $cfg->{match}{start};
+        next if $tm_start < $cfg->{tournament}{start};
         $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
         if($log eq 'log') {
           my $tm_end = to_moment($row{end});
-          last if $tm_end >= $cfg->{match}{end};
+          last if $tm_end >= $cfg->{tournament}{end};
           $row{end_epoch} = $tm_end->epoch;
           $row{end_fmt} = $tm_end->strftime('%Y-%m-%d %H:%M:%S');
           $row{dur_fmt} = format_duration($row{dur});
         } else {
           my $tm_time = to_moment($row{time});
-          next if $tm_time < $cfg->{match}{start};
-          last if $tm_time >= $cfg->{match}{end};
+          next if $tm_time < $cfg->{tournament}{start};
+          last if $tm_time >= $cfg->{tournament}{end};
           $row{time_epoch} = to_moment($row{time})->epoch;
           $row{milestone} =~ s/.$//;
         }
@@ -318,7 +318,7 @@ my $milestones = $state->{milestones};
 #--- resolve "now" moment ----------------------------------------------------
 
 my $now = time();
-my $end_of_tourney = $cfg->{match}{end}->epoch;
+my $end_of_tourney = $cfg->{tournament}{end}->epoch;
 $now = $end_of_tourney if $now > $end_of_tourney;
 
 #--- add 'time_from_now' field to milestones
@@ -639,14 +639,14 @@ $data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
 
 my @count_to;
 
-if($now < $cfg->{match}{start}) {
+if($now < $cfg->{tournament}{start}) {
   $data{phase} = 'before';
-  @count_to = @{$cfg->{match}}{'start','end'};
-} elsif($cfg->{match}{end} <= $now) {
+  @count_to = @{$cfg->{tournament}}{'start','end'};
+} elsif($cfg->{tournament}{end} <= $now) {
   $data{phase} = 'after';
 } else {
   $data{phase} = 'during';
-  @count_to = ($cfg->{match}{end});
+  @count_to = ($cfg->{tournament}{end});
 }
 
 #--- countdown

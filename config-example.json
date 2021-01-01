@@ -4,13 +4,16 @@
   "htmldir" : "html",
   "wget" : "wget --connect-timeout=10 --dns-timeout=5 --read-timeout=60 -t 1 -c -q -O %s %s",
 
+  "tournament": {
+    "start" : "2020-06-01T00:00:00Z",
+    "end" : "2020-07-01T00:00:00Z"
+  },
+
   "match" : {
     "members" : [
       "Mandevil", "shummie", "danielguo94", "BerryKnight", "MrMan",
       "particleface"
-    ],
-    "start" : "2020-06-01T00:00:00Z",
-    "end" : "2020-07-01T00:00:00Z"
+    ]
   },
 
   "web" : {
