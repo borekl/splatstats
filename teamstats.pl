@@ -195,6 +195,16 @@ foreach my $t (qw(start end)) {
   }
 }
 
+# get list of clans
+my @clans = keys %{$cfg->{clans}};
+
+# get list of players
+my @players;
+foreach my $clan (@clans) { push(@players, @{$cfg->{clans}{$clan}{members}}) }
+
+say 'Configured clans: ', join(', ', @clans);
+say 'Configured players: ', join(', ', @players);
+
 #=== state initialization/loading ============================================
 
 my $state_file = path($cfg->{state});
@@ -705,6 +715,14 @@ foreach my $pl (@{$cfg->{match}{members}}) {
     'player.tt',
     \%data,
     "$pl.html"
+  ) or die;
+}
+
+foreach my $clan (@clans) {
+  $tt->process(
+    'clan.tt',
+    \%data,
+    "clan-$clan.html"
   ) or die;
 }
 

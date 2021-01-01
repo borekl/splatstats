@@ -9,6 +9,21 @@
     "end" : "2020-07-01T00:00:00Z"
   },
 
+  "clans" : {
+    "team_a" : {
+      "name" : "TeamSplat",
+      "members" : [
+        "shummie", "MrMan", "BerryKnight", "particleface", "dinky", "Malcom"
+      ]
+    },
+    "team_b": {
+      "name" : "TeamSplatMore",
+      "members" : [
+        "Mandevil", "NeonDemon", "jt"
+      ]
+    }
+  },
+
   "match" : {
     "members" : [
       "Mandevil", "shummie", "danielguo94", "BerryKnight", "MrMan",
