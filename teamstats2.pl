@@ -623,6 +623,12 @@ my $tt = Template->new(
   'RELATIVE' => 1
 );
 
+$tt->process(
+  'index.tt',
+  \%data,
+  'index.html'
+) or die;
+
 foreach my $clan (@clans) {
   $data{clan} = $clan;
   $tt->process(

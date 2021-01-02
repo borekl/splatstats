@@ -5,6 +5,11 @@ body {
   margin: 0;
 }
 
+.flexcenter {
+  display: flex;
+  justify-content: center;
+}
+
 /*--- default links ---------------------------------------------------------*/
 
 a {
@@ -210,4 +215,23 @@ div.footer {
   color: #bbb;
   margin: 1em;
   text-align: center;
+}
+
+
+/*--- INDEX PAGE */
+
+main.index {
+  padding: 2em;
+}
+
+td.teamname {
+  font-family: 'Paytone One', cursive;
+  font-weight: normal;
+  font-size: 150%;
+  padding: 1rem;
+}
+
+td.members {
+  font-size: 80%;
+  font-weight: bold;
 }
