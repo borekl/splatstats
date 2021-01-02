@@ -12,7 +12,11 @@
 <body>
 
 <div class="header">
-  <h1><img class="icon" src="favicon.svg"> <a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html">TeamSplat Statistics</a></h1>
+  <h1>
+    <img class="icon" src="favicon.svg">
+    <a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html"
+    >[% cfg.clans.item(clan).name %] Statistics</a>
+  </h1>
   <h3
     id="countdown"
     data-countdown="[% count_to %]"
@@ -21,7 +25,466 @@
 
 <main>
 
-<h1>E-M-P-T-Y</h1>
+<div class="flexrow">
+
+[%# ========================================================================
+    ==== CLAN MEMBERS ======================================================
+    ======================================================================== %]
+
+<div>
+
+<h2>Clan Members</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>player</th>
+      <th>games</th>
+      <th>wins</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOR pl IN cfg.clans.item(clan).members.sort %]
+      <tr>
+        <td><a href="[% pl %].html">[% pl %]</a></td>
+        <td class="numeric">[% players.item(pl).games.size %]</td>
+        <td class="numeric">[% players.item(pl).wins.size %]</td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+</div>
+
+[%# ========================================================================
+    ==== GAMES IN PROGRESS =================================================
+    ======================================================================== %]
+
+<div>
+
+<h2>Games In Progress</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>player</th>
+      <th>char</th>
+      <th>place</th>
+      <th>xl</th>
+      <th>runes</th>
+      <th>milestone</th>
+      <th>last seen</th>
+      <th colspan="3">srv</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% IF !clans.item(clan).in_progress.size %]
+      <tr><td colspan="9">no games in progress</td></tr>
+    [% END %]
+    [% SET i = 1; FOR ms IN clans.item(clan).in_progress %]
+      <tr>
+        <td>[% i; SET i = i + 1 %]</td>
+        <td><a href="[% ms.name %].html">[% ms.name %]</a></td>
+        <td>[% ms.char %][% IF ms.god %] of [% ms.god %][% END %]</td>
+        <td>[% ms.place %]</td>
+        <td class="numeric">[% ms.xl %]</td>
+        <td class="numeric">[% ms.urune %]</td>
+        <td>[% ms.milestone %]</td>
+        <td class="numeric">[% ms.time_from_now_fmt %] ago</td>
+        <td>[% ms.server.upper %]</td>
+        <td>
+          [% IF players.item(ms.name).dumps.item(ms.server) %]
+            <a
+              target="_blank"
+              class="nodecor"
+              href="[% players.item(ms.name).dumps.item(ms.server) %]">📜</a>
+          [% END %]
+        </td>
+        <td>
+          [% IF players.item(ms.name).watch.item(ms.server) %]
+            <a
+              target="_blank"
+              class="nodecor"
+              href="[% players.item(ms.name).watch.item(ms.server) %]">👁️</a>
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+</div>
+
+</div> [%# flexrow end %]
+
+[%# ========================================================================
+    ==== WON GAMES =========================================================
+    ======================================================================== %]
+
+[% IF clans.item(clan).wins.all.size %]
+
+<h2>Won Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>species</th>
+      <th>background</th>
+      <th>god</th>
+      <th>title</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [%
+      SET i = clans.item(clan).wins.all.size;
+      FOR g IN clans.item(clan).wins.all.reverse;
+    %]
+    <tr class="won">
+      <td class="numeric">[% i; SET i = i - 1 %]</td>
+      <td class="numeric">
+        [% IF g.dumpurl %]
+          <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+        [% ELSE %]
+          [% g.sc.chunk(-3).join(',') %]
+        [% END %]
+      </td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>[% g.race %]</td>
+      <td>[% g.cls %]</td>
+      <td>[% g.god %]</td>
+      <td>[% g.title %]</td>
+      <td class="numeric">[% g.xl %]</td>
+      <td class="numeric">[% g.turn %]</td>
+      <td class="numeric">[% g.dur_fmt %]</td>
+      <td class="numeric">[% g.urune %]</td>
+      <td>[% g.end_fmt %]</td>
+    </tr>
+    [% END %]
+  </tbody>
+</table>
+
+[% END %]
+
+[%# ========================================================================
+    ==== RECENT CLAN =======================================================
+    ======================================================================== %]
+
+[% IF clans.item(clan).games.all.size %]
+
+<h2>Recent Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>player</th>
+      <th>char</th>
+      <th>title</th>
+      <th>place</th>
+      <th>death</th>
+      <th>xl</th>
+      <th>turns</th>
+      <th>duration</th>
+      <th>runes</th>
+      <th>finish date</th>
+    </td>
+  </thead>
+
+  <tbody>
+    [%
+      SET i = 0;
+      SET cnt = cfg.web.clanrecent;
+      WHILE cnt > 0 && i < clans.item(clan).games.all.size;
+        SET g = clans.item(clan).games.all.item(i-1);
+    %]
+    <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
+      <td class="numeric">[% clans.item(clan).games.all.size - i %]</td>
+      <td class="numeric">
+        [% IF g.dumpurl %]
+          <a href="[% g.dumpurl %]">[% g.sc.chunk(-3).join(',') %]</a>
+        [% ELSE %]
+          [% g.sc.chunk(-3).join(',') %]
+        [% END %]
+      </td>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>[% g.char %][% IF g.god %] of [% g.god%][% END %]</td>
+      <td>[% g.title %]</td>
+      <td>[% IF g.ktyp != 'winning'; g.place; END %]</td>
+      <td>[% g.tmsg %]</td>
+      <td class="numeric">[% g.xl %]</td>
+      <td class="numeric">[% g.turn %]</td>
+      <td class="numeric">[% g.dur_fmt %]</td>
+      <td class="numeric">[% g.urune %]</td>
+      <td>[% g.end_fmt %]</td>
+    </tr>
+    [%
+        SET cnt = cnt - 1;
+        SET i = i + 1;
+      END
+    %]
+    [% IF i != 0 %]
+    <tr><td colspan="12" class="more"><a href="games.html">see all games</a></td></tr>
+    [% END %]
+  </tbody>
+</table>
+
+[% END %]
+
+<div class="flexrow">
+
+[%# ========================================================================
+    ==== CLANS BEST GAMES ==================================================
+    ======================================================================== %]
+
+[% IF clans.item(clan).wins.size %]
+
+<div>
+<h2>Clan's Best Games</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th>category</th>
+      <th>player</th>
+      <th>character</th>
+      <th>achievement</th>
+      <th>dump</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    [% IF clans.item(clan).wins.size %]
+    <tr>
+      [% SET g = clans.item(clan).games.by_turncount.item(0) %]
+      <th>Lowest turncount</th>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    <tr>
+      [% SET g = clans.item(clan).games.by_realtime.item(0) %]
+      <th>Fastest realtime</th>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.dur_fmt %] at [% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    <tr>
+      [% SET g = clans.item(clan).games.by_score.item(0) %]
+      <th>Highest score</th>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.sc.chunk(-3).join(',') %] points at [% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    <tr>
+      [% SET g = clans.item(clan).wins.by_xl.item(0) %]
+      <th>Lowest XL win</th>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>
+        [% g.char %]
+        [% IF g.god %] of [% g.god %][% END %]
+      </td>
+      <td>[% g.xl %] XL at [% g.turn %] turns</td>
+      <td>
+        [% IF g.dumpurl %]
+        <a href="[% g.dumpurl %]">dump</a>
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+    [% IF clans.item(clan).games.all.size %]
+    <tr>
+      [% SET m = clans.item(clan).games.by_xlrune.item(0) %]
+      <th>Lowest XL rune</th>
+      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td>
+        [% m.char %]
+        [% IF m.god %] of [% m.god %][% END %]
+      </td>
+      <td>
+        [% mt = m.milestone.match('\b(\w+\srune)\b'); mt.0 %]
+        at [% m.xl %] XL and [% m.turn %] turns
+      </td>
+      <td>
+        [% IF games.by_start.item(m.start_epoch) %]
+          [% SET g = games.by_start.item(m.start_epoch) %]
+          [% IF g.dumpurl %]
+            <a href="[% g.dumpurl %]">dump</a>
+          [% END %]
+        [% END %]
+      </td>
+    </tr>
+    [% END %]
+  </tbody>
+
+</table>
+
+</div>
+
+[% END %]
+
+[%# ========================================================================
+    ==== RUNES COLLECTION ==================================================
+    ======================================================================== %]
+
+<div>
+
+<h2>Runes Progress</h2>
+
+<table class="runes">
+  <tbody>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('decaying') %] class="found"[% END %]>decaying</td>
+      <td[% IF clans.item(clan).runes.exists('gossamer') %] class="found"[% END %]>gossamer</td>
+      <td[% IF clans.item(clan).runes.exists('serpentine') %] class="found"[% END %]>serpentine</td>
+    </tr>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('barnacled') %] class="found"[% END %]>barnacled</td>
+      <td[% IF clans.item(clan).runes.exists('silver') %] class="found"[% END %]>silver</td>
+      <td[% IF clans.item(clan).runes.exists('abyssal') %] class="found"[% END %]>abyssal</td>
+    </tr>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('slimy') %] class="found"[% END %]>slimy</td>
+      <td[% IF clans.item(clan).runes.exists('demonic') %] class="found"[% END %]>demonic</td>
+      <td[% IF clans.item(clan).runes.exists('magical') %] class="found"[% END %]>magical</td>
+    </tr>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('glowing') %] class="found"[% END %]>glowing</td>
+      <td[% IF clans.item(clan).runes.exists('dark') %] class="found"[% END %]>dark</td>
+      <td[% IF clans.item(clan).runes.exists('fiery') %] class="found"[% END %]>fiery</td>
+    </tr>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('iron') %] class="found"[% END %]>iron</td>
+      <td[% IF clans.item(clan).runes.exists('icy') %] class="found"[% END %]>icy</td>
+      <td[% IF clans.item(clan).runes.exists('obsidian') %] class="found"[% END %]>obsidian</td>
+    </tr>
+    <tr>
+      <td[% IF clans.item(clan).runes.exists('bone') %] class="found"[% END %]>bone</td>
+      <td[% IF clans.item(clan).runes.exists('golden') %] class="found"[% END %]>golden</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+</div> [%# flexrow end %]
+
+[%# ========================================================================
+    ==== GODS ==============================================================
+    ======================================================================== %]
+
+<h2>Gods: Maximum Piety</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size - 3; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% NEXT IF !god || god == 'Gozag' || god == 'Xom' %]
+    <td[% IF clans.item(clan).godpiety.exists(god) %] class="found"[% END %]>[% god %]</td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+<h2>Gods: Wins</h2>
+
+<table class="gods">
+<tbody>
+
+  <tr>
+  [% cnt = cfg.game.gods.size; rowcnt = 6; FOR god IN cfg.game.gods %]
+    [% IF !god; SET god = 'No god'; END %]
+    <td[% IF clans.item(clan).godwin.exists(god) %] class="found"[% END %]>
+      [% god %]
+    </td>
+    [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+    [% LAST IF cnt == 0 %]
+    [% IF rowcnt == 0; rowcnt = 6; "</tr><tr>"; END %]
+  [% END %]
+  [% WHILE rowcnt > 0; "<td></td>"; rowcnt = rowcnt - 1; END %]
+  </tr>
+
+</tbody>
+</table>
+
+
+[%# ========================================================================
+    ==== UNIQUES HARVEST ===================================================
+    ======================================================================== %]
+
+<h2>Uniques</h2>
+
+<table class="uniques">
+
+<tbody>
+
+<tr>
+[%
+  SET cnt = cfg.game.uniques.size;
+  SET rowcnt = 5; FOR u IN cfg.game.uniques.sort
+%]
+  <td[% IF clans.item(clan).uniques.exists(u); ' class="found"'; END %]>[% u %]</td>
+  [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
+  [% LAST IF cnt == 0 %]
+  [% IF rowcnt == 0; rowcnt = 5; "</tr></tr>"; END %]
+[% END %]
+  <td class="summary" colspan="[% rowcnt %]">
+    [% clans.item(clan).uniques.keys.size + 0 %]
+    out of
+    [% cfg.game.uniques.size %]
+    killed
+  </td>
+</tr>
+
+</tbody>
+
+</table>
+
 
 </main>
 
