@@ -382,23 +382,29 @@ foreach my $clan (@clans) {
 
 foreach my $player (@players) {
 
-  # won games
-  $data{players}{$player}{wins} = [
-    sort {
-      $a->{end_epoch} <=> $b->{end_epoch}
-    } grep {
-      $_->{ktyp} eq 'winning'
-      && $_->{name} eq $player
-    } @$games
-  ];
-
   # all games
-  $data{players}{$player}{games} = [
+  $data{players}{$player}{games}{all} = [
     sort {
       $a->{end_epoch} <=> $b->{end_epoch}
     } grep {
       $_->{name} eq $player
     } @$games
+  ];
+
+  # won games
+  $data{players}{$player}{games}{wins} = [
+    sort {
+      $a->{end_epoch} <=> $b->{end_epoch}
+    } grep {
+      $_->{ktyp} eq 'winning'
+    } @{$data{players}{$player}{games}{all}}
+  ];
+
+  # sort per-player game lists by score
+  $data{players}{$player}{games}{by_score} = [
+    sort {
+      $b->{sc} <=> $a->{sc}
+    } @{$data{players}{$player}{games}{all}}
   ];
 
   # milestones
@@ -635,6 +641,17 @@ foreach my $clan (@clans) {
     'clan.tt',
     \%data,
     "clan-$clan.html"
+  ) or die;
+}
+
+foreach my $player (@players) {
+  $data{player} = $player;
+  $data{clan} = $player_index{$player};
+  $data{clanname} = $cfg->{clans}{$data{clan}}{name};
+  $tt->process(
+    'player.tt',
+    \%data,
+    "$player.html"
   ) or die;
 }
 

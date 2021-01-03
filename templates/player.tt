@@ -12,11 +12,12 @@
 
 <div class="header">
   <h1><img class="icon" src="favicon.svg"> [% player %]</h1>
-  <h3 class="uppercase"><a href="./">TEAMSPLAT</a></h3>
+  <h3 class="uppercase"><a href="./clan-[% clan %].html">[% clanname %]</a></h3>
 </div>
 
 <main>
 
+[% IF players.item(player).games.all.size %]
 
 <h2>Games In Progress</h2>
 
@@ -51,19 +52,19 @@
         <td class="numeric">[% ms.time_from_now_fmt %] ago</td>
         <td>[% ms.server.upper %]</td>
         <td>
-          [% IF player_dumps.item(ms.name).item(ms.server) %]
+          [% IF players.item(ms.name).dumps.item(ms.server) %]
             <a
               target="_blank"
               class="nodecor"
-              href="[% player_dumps.item(ms.name).item(ms.server)%]">📜</a>
+              href="[% players.item(ms.name).dumps.item(ms.server) %]">📜</a>
           [% END %]
         </td>
         <td>
-          [% IF players.item(ms.name).watchurl.item(ms.server) %]
+          [% IF players.item(ms.name).watch.item(ms.server) %]
             <a
               target="_blank"
               class="nodecor"
-              href="[% players.item(ms.name).watchurl.item(ms.server) %]">👁️</a>
+              href="[% players.item(ms.name).watch.item(ms.server) %]">👁️</a>
           [% END %]
         </td>
       </tr>
@@ -72,7 +73,7 @@
 </table>
 
 
-[% IF players.item(player).won.size %]
+[% IF players.item(player).games.wins.size %]
 
 <h2>Won Games</h2>
 
@@ -96,8 +97,8 @@
   </thead>
 
   <tbody>
-    [% SET i = players.item(player).won.size;
-       FOR g IN players.item(player).won.reverse %]
+    [% SET i = players.item(player).games.wins.size;
+       FOR g IN players.item(player).games.wins.reverse %]
     <tr class="won">
       <td class="numeric">[% i; SET i = i - 1 %]</td>
       <td class="numeric">
@@ -127,8 +128,6 @@
 [%# ======================================================================== %]
 [%# === BEST GAMES ========================================================= %]
 [%# ======================================================================== %]
-
-[% IF players.item(player).games.all.size %]
 
 <h2>Best games</h2>
 
@@ -177,13 +176,9 @@
   </tbody>
 </table>
 
-[% END %]
-
 [%# ======================================================================== %]
 [%# === RECENT GAMES ======================================================= %]
 [%# ======================================================================== %]
-
-[% IF players.item(player).games.all.size %]
 
 <h2>Recent Games</h2>
 
@@ -231,8 +226,6 @@
     [% END %]
   </tbody>
 </table>
-
-[% END %]
 
 [%# ======================================================================== %]
 [%# === RUNES COLLECTION =================================================== %]
@@ -350,6 +343,12 @@
 </tbody>
 
 </table>
+
+[% ELSE %]
+
+<h2>No games played</h2>
+
+[% END %]
 
 </main>
 

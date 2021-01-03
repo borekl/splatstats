@@ -47,8 +47,8 @@
     [% FOR pl IN cfg.clans.item(clan).members.sort %]
       <tr>
         <td><a href="[% pl %].html">[% pl %]</a></td>
-        <td class="numeric">[% players.item(pl).games.size %]</td>
-        <td class="numeric">[% players.item(pl).wins.size %]</td>
+        <td class="numeric">[% players.item(pl).games.all.size %]</td>
+        <td class="numeric">[% players.item(pl).games.wins.size %]</td>
       </tr>
     [% END %]
   </tbody>
