@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use strict;
-use warnings qw(FATAL);
+use warnings;
 use v5.10;
 
 use Path::Tiny;
