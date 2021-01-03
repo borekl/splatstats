@@ -637,6 +637,7 @@ $tt->process(
 
 foreach my $clan (@clans) {
   $data{clan} = $clan;
+  $data{clanname} = $cfg->{clans}{$clan}{name};
   $tt->process(
     'clan.tt',
     \%data,

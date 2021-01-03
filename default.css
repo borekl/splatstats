@@ -228,7 +228,7 @@ td.teamname {
   font-family: 'Paytone One', cursive;
   font-weight: normal;
   font-size: 150%;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
 }
 
 td.members {

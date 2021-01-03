@@ -13,8 +13,8 @@
 
 <div class="header">
   <h1>
-    <img class="icon" src="favicon.svg">
-    <a href="https://crawl.develz.org/tournament/0.25/clans/teamsplat-mandevil.html"
+    <a href="./"><img class="icon" src="favicon.svg"></a>
+    <a href="https://crawl.develz.org/tournament/[% cfg.tournament.version %]/clans/teamsplat-[% cfg.clans.item(clan).members.item(0).lower %].html"
     >[% cfg.clans.item(clan).name %] Statistics</a>
   </h1>
   <h3
