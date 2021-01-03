@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use strict;
-use warnings;
+use warnings qw(FATAL);
 use v5.10;
 
 use Path::Tiny;
@@ -12,20 +12,19 @@ use Template;
 use Getopt::Long;
 use Data::Dumper;
 
-
-#=== globals =================================================================
+#=== globals ==================================================================
 
 my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
 my $cfg;
 
-
-#=== command line options ====================================================
+#=== command line options =====================================================
 
 my $cmd_retrieve = 1;           # retrieve remote logs
 my $cmd_debug = 0;              # debug mode
 
-
-#=== aux functions ===========================================================
+#==============================================================================
+# FUNCTIONS
+#==============================================================================
 
 # Convert time as saved in DCSS logfiles to Unix epoch time. DCSS
 # "start"/"end" time specification is confusing: it looks like ISO 8601, but
@@ -42,6 +41,7 @@ sub to_moment
 }
 
 # format duration to human readable format
+
 sub format_duration
 {
   my $secs = shift;
@@ -65,6 +65,7 @@ sub format_duration
 }
 
 # morgue url
+
 sub morgue_url
 {
   my $row = shift;
@@ -173,6 +174,9 @@ sub check_atheist
   }
 }
 
+#==============================================================================
+# MAIN
+#==============================================================================
 
 #=== command-line processing ==================================================
 
@@ -180,7 +184,6 @@ GetOptions(
   'retrieve!' => \$cmd_retrieve,
   'debug!' => \$cmd_debug
 );
-
 
 #=== load configuration =======================================================
 
@@ -199,8 +202,13 @@ foreach my $t (qw(start end)) {
 my @clans = keys %{$cfg->{clans}};
 
 # get list of players
-my @players;
-foreach my $clan (@clans) { push(@players, @{$cfg->{clans}{$clan}{members}}) }
+my (@players, %player_index);
+foreach my $clan (@clans) {
+  foreach my $player (@{$cfg->{clans}{$clan}{members}}) {
+    $player_index{$player} = $clan;
+    push(@players, $player);
+  }
+}
 
 say 'Configured clans: ', join(', ', @clans);
 say 'Configured players: ', join(', ', @players);
@@ -211,8 +219,9 @@ my $state_file = path($cfg->{state});
 my $state = {};
 
 if(-f $state_file) {
-  say 'State file exists, loading';
+  print 'State file exists, loading ... ';
   $state = $js->decode($state_file->slurp_raw());
+  say 'done'
 } else {
   $state->{games} = [];
   $state->{milestones} = [];
@@ -262,7 +271,11 @@ if($cmd_retrieve) {
         $count_total++;
 
         # check for team members, ignore all other entries
-        next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
+        #next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
+        next if !exists $player_index{$row{name}};
+
+        # add clan id to every row
+        $row{clan} = $player_index{$row{name}};
 
         # convert dates into epoch/human readble format and match time bracket
         my $tm_start = to_moment($row{start});
@@ -315,12 +328,11 @@ if($cmd_retrieve) {
 
 }
 
-#=== processing of data ======================================================
+#=== processing data ==========================================================
 
 my %data = (
-  games => { all => $state->{games} },
-  milestones => $state->{milestones},
   cfg => $cfg,
+  milestones => $state->{milestones}
 );
 
 my $games = $state->{games};
@@ -345,55 +357,80 @@ foreach my $g (@$games) {
   $data{games}{by_start}{$g->{start_epoch}} = $g;
 }
 
-#--- list of clan games sorted by end time -----------------------------------
+#--- list of all clan games sorted by end time --------------------------------
 
-$data{clan}{games} = [
-  sort { $b->{end_epoch} <=> $a->{end_epoch} } @$games
-];
+foreach my $clan (@clans) {
+  $data{clans}{$clan}{games}{all} = [
+    sort { $b->{end_epoch} <=> $a->{end_epoch} }
+    grep { $_->{clan} eq $clan } @$games
+  ];
+}
 
 #--- list of won clan games --------------------------------------------------
 
-my @won = sort {
-  $a->{end_epoch} <=> $b->{end_epoch}
-} grep {
-  $_->{ktyp} eq 'winning'
-} @$games;
+foreach my $clan (@clans) {
+  my @wins = sort {
+    $a->{end_epoch} <=> $b->{end_epoch}
+  } grep {
+    $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
+  } @$games;
 
-$data{clan}{won} = \@won;
+  $data{clans}{$clan}{wins}{all} = \@wins;
+}
 
-#--- list of won/all player games ---------------------------------------------
+#--- by-player stats ----------------------------------------------------------
 
-foreach my $pl (@{$cfg->{match}{members}}) {
+foreach my $player (@players) {
 
-  $data{players}{$pl}{won} = [
+  # all games
+  $data{players}{$player}{games}{all} = [
+    sort {
+      $a->{end_epoch} <=> $b->{end_epoch}
+    } grep {
+      $_->{name} eq $player
+    } @$games
+  ];
+
+  # won games
+  $data{players}{$player}{games}{wins} = [
     sort {
       $a->{end_epoch} <=> $b->{end_epoch}
     } grep {
       $_->{ktyp} eq 'winning'
-      && $_->{name} eq $pl
-    } @$games
+    } @{$data{players}{$player}{games}{all}}
   ];
 
-  $data{players}{$pl}{games} = [
+  # sort per-player game lists by score
+  $data{players}{$player}{games}{by_score} = [
     sort {
-      $a->{end_epoch} <=> $b->{end_epoch}
-    } grep {
-      $_->{name} eq $pl
-    } @$games
+      $b->{sc} <=> $a->{sc}
+    } @{$data{players}{$player}{games}{all}}
   ];
 
-}
+  # milestones
+  my @milestones_by_player = sort {
+    $a->{time_epoch} <=> $b->{time_epoch}
+  } grep {
+    $_->{name} eq $player
+  } @$milestones;
 
-#--- recent clan games -------------------------------------------------------
+  # find all servers player has started a game on; we record number of games
+  # player has started on each server and then create a sorted list; sorted
+  # list is useful in the web where we can list most used servers first
+  foreach my $ms (@milestones_by_player) {
+    next if $ms->{type} ne 'begin';
+    $data{players}{$player}{servers}{$ms->{server}}++;
+  }
+  $data{players}{$player}{servers} = [ sort {
+    $data{players}{$player}{servers}{$b} cmp $data{players}{$player}{servers}{$a}
+  } keys %{$data{players}{$player}{servers}} ];
 
-if(@{$games} <= $cfg->{web}{clanrecent}) {
-  $data{clan}{recent} = [ sort {
-    $b->{end_epoch} <=> $a->{end_epoch}
-  } @$games ];
-} else {
-  $data{clan}{recent} = [ ( sort {
-    $b->{end_epoch} <=> $a->{end_epoch}
-  } @$games )[0..$cfg->{web}{clanrecent}] ];
+  foreach my $server (@{$data{players}{$player}{servers}}) {
+    $data{players}{$player}{dumps}{$server}
+    = server_url($server, 'dump', $player);
+    $data{players}{$player}{watch}{$server}
+    = server_url($server, 'watch', $player);
+  }
 }
 
 #--- last milestone per (player, server)
@@ -412,143 +449,101 @@ foreach my $ms (sort { $a->{time_epoch} <=> $b->{time_epoch} } @$milestones) {
 # "player.PLR.in_progress". The stored entities are references to the last
 # milestone entries of ongoing games.
 
-my @clan_in_progress;
+foreach my $player (@players) {
 
-foreach my $pl (keys %{$data{players}}) {
-  next if !exists $data{players}{$pl}{last_milestones};
-  my @plr_in_progress;
-  foreach my $srv (keys %{$data{players}{$pl}{last_milestones}}) {
-    my $ms = $data{players}{$pl}{last_milestones}{$srv};
+  # ignore players without any recorded milestones
+  next if !exists $data{players}{$player}{last_milestones};
+
+  # get player's clan association
+  my $clan = $player_index{$player};
+
+  # initialize in progress lists
+  $data{players}{$player}{in_progress} = [];
+  $data{clans}{$clan}{in_progress} = []
+    if !exists $data{clans}{$clan}{in_progress};
+
+  # iterate over servers player has milestones on
+  foreach my $srv (keys %{$data{players}{$player}{last_milestones}}) {
+    my $ms = $data{players}{$player}{last_milestones}{$srv};
     if(!exists $data{games}{by_start}{$ms->{start_epoch}}) {
-      push(@plr_in_progress, $ms);
-      push(@clan_in_progress, $ms);
+      push(@{$data{clans}{$clan}{in_progress}}, $ms);
+      push(@{$data{players}{$player}{in_progress}}, $ms);
     }
   }
-  if(@plr_in_progress) {
-    @plr_in_progress = sort {
+
+  # sort current player's games in progress list
+  $data{players}{$player}{in_progress} = [
+    sort {
       $a->{time_from_now} <=> $b->{time_from_now}
-    } @plr_in_progress;
-  }
-  $data{players}{$pl}{in_progress} = \@plr_in_progress;
+    } @{$data{players}{$player}{in_progress}}
+  ];
+
 }
 
-if(@clan_in_progress) {
-  @clan_in_progress = sort {
-    $a->{time_from_now} <=> $b->{time_from_now}
-  } @clan_in_progress;
+# sort all clans' games in progress list
+foreach my $clan (@clans) {
+  $data{clans}{$clan}{in_progress} = [
+    sort {
+      $a->{time_from_now} <=> $b->{time_from_now}
+    } @{$data{clans}{$clan}{in_progress}}
+  ]
 }
 
-$data{clan}{in_progress} = \@clan_in_progress;
+#--- best clan games ----------------------------------------------------------
 
-#--- generate list of games, milestones and used servers by players
-
-my %games_by_players;
-my %wins_by_players;
-my %milestones_by_players;
-my %servers_by_players;
-my %player_dumps;
-
-foreach my $plr (@{$cfg->{match}{members}}) {
-
-  # games
-  $games_by_players{$plr} = [ sort {
-    $a->{end_epoch} <=> $b->{end_epoch}
-  } grep {
-    $_->{name} eq $plr
-  } @$games ];
-
-  # wins
-  $wins_by_players{$plr} = [ grep {
-    $_->{ktyp} eq 'winning'
-  } @{$games_by_players{$plr}} ];
-
-  # milestones
-  $milestones_by_players{$plr} = [ sort {
-    $a->{time_epoch} <=> $b->{time_epoch}
-  } grep {
-    $_->{name} eq $plr
-  } @$milestones ];
-
-  # servers used by player
-  $servers_by_players{$plr} = {};
-  $player_dumps{$plr} = {};
-  foreach my $ms (@{$milestones_by_players{$plr}}) {
-    next if $ms->{type} ne 'begin';
-    $servers_by_players{$plr}{$ms->{server}}++;
-  }
-  $servers_by_players{$plr} = [ sort {
-    $servers_by_players{$plr}{$b} cmp $servers_by_players{$plr}{$a}
-  } keys %{$servers_by_players{$plr}} ];
-
-  foreach my $server (@{$servers_by_players{$plr}}) {
-    $player_dumps{$plr}{$server} = server_url($server, 'dump', $plr);
-
-    $data{players}{$plr}{watchurl}{$server}
-    = server_url($server, 'watch', $plr);
-  }
-}
-
-$data{games}{by_players} = \%games_by_players;
-$data{wins}{by_players} = \%wins_by_players;
-$data{servers}{by_players} = \%servers_by_players;
-$data{player_dumps} = \%player_dumps;
-
-#--- games by turncount ------------------------------------------------------
-
-$data{games}{turncount} = [
-  sort {
-    $a->{turn} <=> $b->{turn}
-  } grep {
-    $_->{ktyp} eq 'winning'
-  } @$games
-];
-
-#--- games by realtime -------------------------------------------------------
-
-$data{games}{realtime} = [
-  sort {
-    $a->{dur} <=> $b->{dur}
-  } grep {
-    $_->{ktyp} eq 'winning'
-  } @$games
-];
-
-#--- games by turncount ------------------------------------------------------
-
-$data{games}{score} = [
-  sort {
-    $b->{sc} <=> $a->{sc}
-  } @$games
-];
-
-#--- wins by xl --------------------------------------------------------------
-
-$data{games}{xlwins} = [
-  sort {
-    if($a->{xl} == $b->{xl}) {
+foreach my $clan (@clans) {
+  # best turncount
+  $data{clans}{$clan}{games}{by_turncount} = [
+    sort {
       $a->{turn} <=> $b->{turn}
-    } else {
-      $a->{xl} <=> $b->{xl}
+    } grep {
+      $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
+    } @$games
+  ];
+  # best realtime
+  $data{clans}{$clan}{games}{by_realtime} = [
+    sort {
+      $a->{dur} <=> $b->{dur}
+    } grep {
+      $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
+    } @$games
+  ];
+  # highest score
+  $data{clans}{$clan}{games}{by_score} = [
+    sort {
+      $b->{sc} <=> $a->{sc}
+    } grep {
+      $_->{clan} eq $clan
+    } @$games
+  ];
+  # lowest xl win
+  $data{clans}{$clan}{wins}{by_xl} = [
+    sort {
+      if($a->{xl} == $b->{xl}) {
+        $a->{turn} <=> $b->{turn}
+      } else {
+        $a->{xl} <=> $b->{xl}
+      }
     }
-  } grep {
-    $_->{ktyp} eq 'winning'
-  } @$games
-];
-
-#--- first runes by xl -------------------------------------------------------
-
-$data{games}{xlrunes} = [
-  sort {
-    if($a->{xl} == $b->{xl}) {
-      $a->{turn} <=> $b->{turn}
-    } else {
-      $a->{xl} <=> $b->{xl}
-    }
-  } grep {
-    $_->{type} eq 'rune'
-    && $_->{urune} == 1
-  } @$milestones
-];
+    grep {
+        $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
+    } @$games
+  ];
+  # lowest xl rune
+  $data{clans}{$clan}{games}{by_xlrune} = [
+    sort {
+      if($a->{xl} == $b->{xl}) {
+        $a->{turn} <=> $b->{turn}
+      } else {
+        $a->{xl} <=> $b->{xl}
+      }
+    } grep {
+      $_->{clan} eq $clan
+      && $_->{type} eq 'rune'
+      && $_->{urune} == 1
+    } @$milestones
+  ];
+}
 
 #--- runes -------------------------------------------------------------------
 
@@ -558,36 +553,17 @@ foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'rune';
   $ms->{milestone} =~ /\b(\w+)\srune\b/;
   my $rune = $1;
-  $data{clan}{runes}{$rune}++;
+  my $clan = $player_index{$ms->{name}};
+  $data{clans}{$clan}{runes}{$rune}++;
   $data{players}{$ms->{name}}{runes}{$rune}++;
-}
-
-#--- uniques -----------------------------------------------------------------
-
-# uniques harvest sttus, both for individual players and clan as a whole
-
-foreach my $ms (@$milestones) {
-  next if $ms->{type} ne 'uniq';
-  my $msg = $ms->{milestone};
-  $msg =~ s/\d+-headed\s//;
-  $msg =~ s/Royal Jelly/royal jelly/;
-  $msg =~ /killed\s(.*)$/;
-  my $unique = $1;
-  next if !$unique;
-  # mapping unique names
-  $unique = $cfg->{game}{uniquesmap}{$unique} if (
-    exists $cfg->{game}{uniquesmap}
-    && exists $cfg->{game}{uniquesmap}{$unique}
-  );
-  $data{clan}{uniques}{$unique}++;
-  $data{players}{$ms->{name}}{uniques}{$unique}++;
 }
 
 #--- god maxpiety ------------------------------------------------------------
 
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'god.maxpiety';
-  $data{clan}{godpiety}{$ms->{god}}++;
+  my $clan = $player_index{$ms->{name}};
+  $data{clans}{$clan}{godpiety}{$ms->{god}}++;
   $data{players}{$ms->{name}}{godpiety}{$ms->{god}}++;
 }
 
@@ -599,97 +575,53 @@ foreach my $ms (@$milestones) {
 foreach my $g (@$games) {
   next if $g->{ktyp} ne 'winning';
   my $god = $g->{god};
+  my $clan = $player_index{$g->{name}};
   if(!$god) {
     if(check_atheist(\%data, $g)) {
-      $data{clan}{godwin}{'No god'}++;
+      $data{clans}{$clan}{godwin}{'No god'}++;
       $data{players}{$g->{name}}{godwin}{'No god'}++;
     }
   } elsif($god eq 'Xom' || $god eq 'Gozag') {
     if(check_god_exclusivity(\%data, $g)) {
-      $data{clan}{godwin}{$god}++;
+      $data{clans}{$clan}{godwin}{$god}++;
       $data{players}{$g->{name}}{godwin}{$god}++;
     }
   } else {
     if(check_god_maxpiety(\%data, $g)) {
-      $data{clan}{godwin}{$god}++;
+      $data{clans}{$clan}{godwin}{$god}++;
       $data{players}{$g->{name}}{godwin}{$god}++;
     }
   }
 }
 
-#--- best player games -------------------------------------------------------
+#--- uniques -----------------------------------------------------------------
 
-# initialize the players.PLR.games.all lists
-foreach my $plr (@{$cfg->{match}{members}}) {
-  $data{players}{$plr}{games} = { all => [], by_score => [] };
-}
+# uniques harvest status, both for individual players and clan as a whole
 
-# create per-player game lists
-foreach my $g (@$games) {
-  push(@{$data{players}{$g->{name}}{games}{all}}, $g);
-}
-
-# sort per-player game lists by score
-foreach my $plr (@{$cfg->{match}{members}}) {
-  $data{players}{$plr}{games}{by_score} =
-  [ sort { $b->{sc} <=> $a->{sc} } @{$data{players}{$plr}{games}{all}} ]
-}
-
-#--- generation time
-
-$now = Time::Moment->now_utc;
-$data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
-
-#--- tournament phase and future countdown targets
-
-# following code find at what timepoint in relation to the tournament we are
-# (before, during, after); and also creates a list (@count_to) of future
-# countdown targets; if we are before the tournament, there are two targets
-# (the start and the end), if we are during the tournament, then there is only
-# one (the end); if we are after, there are none
-
-my @count_to;
-
-if($now < $cfg->{tournament}{start}) {
-  $data{phase} = 'before';
-  @count_to = @{$cfg->{tournament}}{'start','end'};
-} elsif($cfg->{tournament}{end} <= $now) {
-  $data{phase} = 'after';
-} else {
-  $data{phase} = 'during';
-  @count_to = ($cfg->{tournament}{end});
-}
-
-#--- countdown
-
-# format the actual countdown string for server-side rendered countdown and
-# create list of countdown targets (in epoch format) for the front-side
-# countdown JavaScript code
-
-if($data{phase} ne 'after') {
-  my ($dy, $h, $d, $s) = (
-    $now->delta_days($count_to[0]),
-    $now->delta_hours($count_to[0]) % 24,
-    $now->delta_minutes($count_to[0]) % 60,
-    $now->delta_seconds($count_to[0]) % 60,
+foreach my $ms (@$milestones) {
+  next if $ms->{type} ne 'uniq';
+  my $clan = $player_index{$ms->{name}};
+  my $msg = $ms->{milestone};
+  $msg =~ s/\d+-headed\s//;
+  $msg =~ s/Royal Jelly/royal jelly/;
+  $msg =~ /killed\s(.*)$/;
+  my $unique = $1;
+  next if !$unique;
+  # mapping unique names
+  $unique = $cfg->{game}{uniquesmap}{$unique} if (
+    exists $cfg->{game}{uniquesmap}
+    && exists $cfg->{game}{uniquesmap}{$unique}
   );
-
-  if($dy) {
-    $data{countdown} = sprintf('%dd, %02d:%02d:%02d', $dy, $h, $d, $s);
-  } else {
-    $data{countdown} = sprintf('%02d:%02d:%02d', $h, $d, $s);
-  }
-} else {
-  $data{countdown} = sprintf('%02d:%02d:%02d', 0, 0, 0);
+  $data{clans}{$clan}{uniques}{$unique}++;
+  $data{players}{$ms->{name}}{uniques}{$unique}++;
 }
-$data{count_to} = join(',', map { $_->epoch } @count_to);
 
-#--- debug output ------------------------------------------------------------
+#--- generation time ----------------------------------------------------------
 
-path("debug.$$")->spew(Dumper(\%data)) if $cmd_debug;
+my $gentime = Time::Moment->now_utc;
+$data{gentime} = $gentime->strftime('%Y-%m-%d %H:%M:%S');
 
-
-#=== generate HTML pages =====================================================
+#=== generate HTML pages ======================================================
 
 my $tt = Template->new(
   'OUTPUT_PATH' => $cfg->{htmldir},
@@ -703,30 +635,34 @@ $tt->process(
   'index.html'
 ) or die;
 
-$tt->process(
-  'games.tt',
-  \%data,
-  'games.html'
-) or die;
-
-foreach my $pl (@{$cfg->{match}{members}}) {
-  $data{player} = $pl;
-  $tt->process(
-    'player.tt',
-    \%data,
-    "$pl.html"
-  ) or die;
-}
-
 foreach my $clan (@clans) {
+  $data{clan} = $clan;
+  $data{clanname} = $cfg->{clans}{$clan}{name};
   $tt->process(
     'clan.tt',
     \%data,
     "clan-$clan.html"
   ) or die;
+
+  $tt->process(
+    'games.tt',
+    \%data,
+    "games-$clan.html"
+  ) or die;
 }
 
-#=== save state ==============================================================
+foreach my $player (@players) {
+  $data{player} = $player;
+  $data{clan} = $player_index{$player};
+  $data{clanname} = $cfg->{clans}{$data{clan}}{name};
+  $tt->process(
+    'player.tt',
+    \%data,
+    "$player.html"
+  ) or die;
+}
+
+#=== save state ===============================================================
 
 if($cmd_retrieve) {
   say "Saving state";
