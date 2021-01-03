@@ -251,7 +251,7 @@
     ==== CLANS BEST GAMES ==================================================
     ======================================================================== %]
 
-[% IF clans.item(clan).wins.size %]
+[% IF clans.item(clan).games.wins.size %]
 
 <div>
 <h2>Clan's Best Games</h2>
