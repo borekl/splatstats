@@ -642,6 +642,12 @@ foreach my $clan (@clans) {
     \%data,
     "clan-$clan.html"
   ) or die;
+
+  $tt->process(
+    'games.tt',
+    \%data,
+    "games-$clan.html"
+  ) or die;
 }
 
 foreach my $player (@players) {

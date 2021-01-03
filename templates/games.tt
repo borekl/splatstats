@@ -11,8 +11,8 @@
 <body>
 
 <div class="header">
-  <h1><img class="icon" src="favicon.svg"> All Teamsplat Games</h1>
-  <h3 class="uppercase"><a href="./">TEAMSPLAT</a></h3>
+  <h1><img class="icon" src="favicon.svg"> All [% clanname %] Games</h1>
+  <h3 class="uppercase"><a href="./clan-[% clan %].html">[% clanname %]</a></h3>
 </div>
 
 <main class="single">
@@ -37,10 +37,13 @@
   </thead>
 
   <tbody>
-    [% IF !clan.games.size %]
+    [% IF !clans.item(clan).games.all.size %]
     <tr><td colspan="12">no games so far</td></tr>
     [% END %]
-    [% SET i = clan.games.size; FOR g IN clan.games %]
+    [%
+      SET i = clans.item(clan).games.all.size;
+      FOR g IN clans.item(clan).games.all;
+    %]
     <tr[% IF g.ktyp == 'winning'; ' class="won"'; END %]>
       <td class="numeric">[% i; SET i = i - 1 %]</td>
       <td class="numeric">
