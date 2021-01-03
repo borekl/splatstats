@@ -598,6 +598,14 @@ foreach my $g (@$games) {
 
 # uniques harvest status, both for individual players and clan as a whole
 
+foreach my $clan (@clans) {
+  $data{clans}{$clan}{uniques} = {};
+}
+
+foreach my $player (@players) {
+  $data{players}{$player}{uniques} = {};
+}
+
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'uniq';
   my $clan = $player_index{$ms->{name}};
