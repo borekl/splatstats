@@ -35,7 +35,7 @@
 
 <h2>Clan Members</h2>
 
-<table>
+<table class="striped">
   <thead>
     <tr>
       <th>player</th>
@@ -64,7 +64,7 @@
 
 <h2>Games In Progress</h2>
 
-<table>
+<table class="striped">
   <thead>
     <tr>
       <th></th>
@@ -127,7 +127,7 @@
 
 <h2>Won Games</h2>
 
-<table>
+<table class="striped">
 
   <thead>
     <tr>
@@ -185,7 +185,7 @@
 
 <h2>Recent Games</h2>
 
-<table>
+<table class="striped">
 
   <thead>
     <tr>
@@ -256,7 +256,7 @@
 <div>
 <h2>Clan's Best Games</h2>
 
-<table>
+<table class="striped">
 
   <thead>
     <tr>

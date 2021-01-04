@@ -149,7 +149,7 @@ th, tr.won {
   font-weight: bold;
 }
 
-tr:nth-child(2n) {
+table.striped tr:nth-child(2n) {
   background-color: #f0ffe0;
 }
 
