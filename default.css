@@ -10,6 +10,19 @@ body {
   justify-content: center;
 }
 
+.font {
+  font-family: 'Paytone One', cursive;
+  font-weight: normal;
+}
+
+.fs-big {
+  font-size: 166%;
+}
+
+.center {
+  text-align: center;
+}
+
 /*--- default links ---------------------------------------------------------*/
 
 a {
@@ -224,14 +237,30 @@ main.index {
   padding: 2em;
 }
 
+table.clanlist {
+  min-width: 35rem;
+}
+
 td.teamname {
   font-family: 'Paytone One', cursive;
   font-weight: normal;
   font-size: 150%;
   padding: 0.5rem 1rem;
+  background-color: rgb(255, 250, 224);
 }
 
 td.members {
   font-size: 80%;
   font-weight: bold;
+  background-color: rgb(255, 250, 224);
+}
+
+div.claninfo {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.infoitem {
+  width: 24%;
 }

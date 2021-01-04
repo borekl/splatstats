@@ -14,7 +14,6 @@
 <div class="header">
   <h1><img class="icon" src="favicon.svg"> TeamSplat Statistics</h1>
   <h3
-
     id="countdown"
     data-countdown="[% count_to %]"
   >[% countdown %]</h3>
@@ -24,14 +23,80 @@
 
 <table class="clanlist">
   [% FOR clan IN cfg.clans.keys.sort %]
+
     <tr>
+
       <td class="teamname">
         <a class="nodecor" href="clan-[% clan %].html">[% cfg.clans.item(clan).name %]</a>
       </td>
+
       <td class="members">
         [% SET f = 0; FOR member IN cfg.clans.item(clan).members %][% IF f; ', '; END %]<a href="[% member %].html">[% member %]</a>[% SET f = 1 %][% END %]
       </td>
+
     </tr>
+
+    <tr>
+
+      <td colspan="2">
+        <div class="claninfo">
+          <div class="center infoitem">
+            <span class="font fs-big">[% clans.item(clan).games.all.size %]</span><br>
+            games
+          </div>
+          <div class="center infoitem">
+            <span class="font fs-big">[% clans.item(clan).games.wins.size %]</span><br>
+            wins
+          </div>
+          <div class="center infoitem">
+            <span class="font fs-big">[% clans.item(clan).games.wins_allrune.size %]</span><br>
+            allrune
+          </div>
+          <div class="center infoitem">
+            [%
+              SET runes = 0;
+              FOR r IN clans.item(clan).runes.keys;
+                runes = runes + clans.item(clan).runes.item(r);
+              END;
+            %]
+            <span class="font fs-big">[% runes %]</span><br>
+            runes
+          </div>
+        </div>
+
+        <div class="claninfo">
+          <div class="center infoitem">
+            <span class="font fs-big">[% clans.item(clan).uniques.keys.size %]</span><br>
+            uniques
+          </div>
+          <div class="center infoitem infoitem">
+            <span class="font fs-big">[% clans.item(clan).combos.keys.size %]</span><br>
+            combos
+          </div>
+          <div class="center infoitem">
+            <span class="font fs-big">[% clans.item(clan).gkills %]</span><br>
+            gkills
+          </div>
+          <div class="center infoitem">
+            <span class="font fs-big">
+              [%
+                IF clans.item(clan).games.all.size;
+                  clans.item(clan).games.by_score.item(0).sc.chunk(-3).join(' ');
+                ELSE;
+                  '0';
+                END;
+              %]
+            </span><br>
+            top score
+          </div>
+        </div>
+
+      </td>
+
+      </td>
+
+    </tr>
+
   [% END %]
 </table>
 

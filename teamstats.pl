@@ -374,7 +374,30 @@ foreach my $clan (@clans) {
     $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
   } @$games;
 
+  my @wins_allrune = sort {
+    $a->{end_epoch} <=> $b->{end_epoch}
+  } grep {
+    $_->{urune} == 15
+  } @wins;
+
   $data{clans}{$clan}{games}{wins} = \@wins;
+  $data{clans}{$clan}{games}{wins_allrune} = \@wins_allrune;
+}
+
+#--- clan combos --------------------------------------------------------------
+
+foreach my $clan (@clans) {
+  my %combos;
+  foreach my $row (@{$data{clans}{$clan}{games}{wins}}) {
+    $combos{ $row->{char} }++;
+  }
+  $data{clans}{$clan}{combos} = \%combos;
+}
+
+#--- clan ghost kills ---------------------------------------------------------
+
+foreach my $clan (@clans) {
+  $data{clans}{$clan}{gkills} = grep { $_->{type} eq 'ghost' } @$milestones;
 }
 
 #--- by-player stats ----------------------------------------------------------
