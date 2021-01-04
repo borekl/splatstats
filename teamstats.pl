@@ -648,8 +648,53 @@ foreach my $ms (@$milestones) {
 
 #--- generation time ----------------------------------------------------------
 
-my $gentime = Time::Moment->now_utc;
-$data{gentime} = $gentime->strftime('%Y-%m-%d %H:%M:%S');
+$now = Time::Moment->now_utc;
+$data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
+
+#--- tournament phase and future countdown targets
+
+# following code find at what timepoint in relation to the tournament we are
+# (before, during, after); and also creates a list (@count_to) of future
+# countdown targets; if we are before the tournament, there are two targets
+# (the start and the end), if we are during the tournament, then there is only
+# one (the end); if we are after, there are none
+
+my @count_to;
+
+if($now < $cfg->{tournament}{start}) {
+  $data{phase} = 'before';
+  @count_to = @{$cfg->{tournament}}{'start','end'};
+} elsif($cfg->{tournament}{end} <= $now) {
+  $data{phase} = 'after';
+} else {
+  $data{phase} = 'during';
+  @count_to = ($cfg->{tournament}{end});
+}
+
+#--- countdown
+
+# format the actual countdown string for server-side rendered countdown and
+# create list of countdown targets (in epoch format) for the front-side
+# countdown JavaScript code
+
+if($data{phase} ne 'after') {
+  use integer;
+
+  my $s = $now->delta_seconds($count_to[0]);
+  my $d = $s / 86400; $s %= 86400;
+  my $h = $s / 3600; $s %= 3600;
+  my $m = $s / 60; $s %= 60;
+
+  if($d) {
+    $data{countdown} = sprintf('%dd, %02d:%02d:%02d', $d, $h, $m, $s);
+  } else {
+    $data{countdown} = sprintf('%02d:%02d:%02d', $h, $m, $s);
+  }
+} else {
+  $data{countdown} = sprintf('%02d:%02d:%02d', 0, 0, 0);
+}
+$data{count_to} = join(',', map { $_->epoch } @count_to);
+
 
 #=== generate HTML pages ======================================================
 
