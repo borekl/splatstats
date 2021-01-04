@@ -23,6 +23,10 @@ body {
   text-align: center;
 }
 
+.nopad {
+  padding: 0;
+}
+
 /*--- default links ---------------------------------------------------------*/
 
 a {
@@ -242,6 +246,37 @@ main.index {
 
 table.clanlist {
   min-width: 35rem;
+  border: 14px solid #ddd;
+}
+
+table.embedded {
+  width: 100%;
+  border: none;
+  font-size: 125%;
+}
+
+table.embedded tr:first-child th {
+  border-top: none;
+}
+
+table.embedded tr:last-child td {
+  border-bottom: none;
+}
+
+table.embedded td:first-child {
+  border-left: none;
+}
+
+table.embedded th:first-child {
+  border-left: none;
+}
+
+table.embedded td:last-child {
+  border-right: none;
+}
+
+table.embedded th:last-child {
+  border-right: none;
 }
 
 td.teamname {
@@ -266,4 +301,8 @@ div.claninfo {
 
 .infoitem {
   width: 24%;
+}
+
+tr.divider {
+  background-color: #ddd;
 }
