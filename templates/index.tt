@@ -21,7 +21,7 @@
 
 <main class="flexcenter index">
 
-<table class="clanlist">
+<table class="shadowed clanlist">
   [% FOR clan IN cfg.clans.keys.sort %]
 
     <tr>
