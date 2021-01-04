@@ -374,7 +374,7 @@ foreach my $clan (@clans) {
     $_->{clan} eq $clan && $_->{ktyp} eq 'winning'
   } @$games;
 
-  $data{clans}{$clan}{wins}{all} = \@wins;
+  $data{clans}{$clan}{games}{wins} = \@wins;
 }
 
 #--- by-player stats ----------------------------------------------------------
@@ -492,7 +492,7 @@ foreach my $clan (@clans) {
 
 foreach my $clan (@clans) {
   # best turncount
-  $data{clans}{$clan}{games}{by_turncount} = [
+  $data{clans}{$clan}{games}{wins_by_turncount} = [
     sort {
       $a->{turn} <=> $b->{turn}
     } grep {
@@ -500,7 +500,7 @@ foreach my $clan (@clans) {
     } @$games
   ];
   # best realtime
-  $data{clans}{$clan}{games}{by_realtime} = [
+  $data{clans}{$clan}{games}{wins_by_realtime} = [
     sort {
       $a->{dur} <=> $b->{dur}
     } grep {
@@ -516,7 +516,7 @@ foreach my $clan (@clans) {
     } @$games
   ];
   # lowest xl win
-  $data{clans}{$clan}{wins}{by_xl} = [
+  $data{clans}{$clan}{games}{wins_by_xl} = [
     sort {
       if($a->{xl} == $b->{xl}) {
         $a->{turn} <=> $b->{turn}

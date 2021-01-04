@@ -123,7 +123,7 @@
     ==== WON GAMES =========================================================
     ======================================================================== %]
 
-[% IF clans.item(clan).wins.all.size %]
+[% IF clans.item(clan).games.wins.all.size %]
 
 <h2>Won Games</h2>
 
@@ -148,8 +148,8 @@
 
   <tbody>
     [%
-      SET i = clans.item(clan).wins.all.size;
-      FOR g IN clans.item(clan).wins.all.reverse;
+      SET i = clans.item(clan).games.wins.all.size;
+      FOR g IN clans.item(clan).games.wins.all.reverse;
     %]
     <tr class="won">
       <td class="numeric">[% i; SET i = i - 1 %]</td>
@@ -269,9 +269,9 @@
   </thead>
 
   <tbody>
-    [% IF clans.item(clan).wins.size %]
+    [% IF clans.item(clan).games.wins.size %]
     <tr>
-      [% SET g = clans.item(clan).games.by_turncount.item(0) %]
+      [% SET g = clans.item(clan).games.wins_by_turncount.item(0) %]
       <th>Lowest turncount</th>
       <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
@@ -286,7 +286,7 @@
       </td>
     </tr>
     <tr>
-      [% SET g = clans.item(clan).games.by_realtime.item(0) %]
+      [% SET g = clans.item(clan).games.wins_by_realtime.item(0) %]
       <th>Fastest realtime</th>
       <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
@@ -316,7 +316,7 @@
       </td>
     </tr>
     <tr>
-      [% SET g = clans.item(clan).wins.by_xl.item(0) %]
+      [% SET g = clans.item(clan).games.wins_by_xl.item(0) %]
       <th>Lowest XL win</th>
       <td><a href="[% g.name %].html">[% g.name %]</a></td>
       <td>
