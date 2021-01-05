@@ -247,7 +247,7 @@
 
 <h2>Runes Progress</h2>
 
-<table class="runes">
+<table class="runes striped">
   <tbody>
     <tr>
       <td[% IF players.item(player).runes.exists('decaying') %] class="found"[% END %]>decaying</td>
@@ -288,7 +288,7 @@
 
 <h2>Gods: Maximum Piety</h2>
 
-<table class="gods">
+<table class="gods striped">
 <tbody>
 
   <tr>
@@ -307,7 +307,7 @@
 
 <h2>Gods: Wins</h2>
 
-<table class="gods">
+<table class="gods striped">
 <tbody>
 
   <tr>
@@ -332,7 +332,7 @@
 
 <h2>Uniques</h2>
 
-<table class="uniques">
+<table class="uniques striped">
 
 <tbody>
 
