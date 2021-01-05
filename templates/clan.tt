@@ -123,7 +123,7 @@
     ==== WON GAMES =========================================================
     ======================================================================== %]
 
-[% IF clans.item(clan).games.wins.all.size %]
+[% IF clans.item(clan).games.wins.size %]
 
 <h2>Won Games</h2>
 
@@ -148,8 +148,8 @@
 
   <tbody>
     [%
-      SET i = clans.item(clan).games.wins.all.size;
-      FOR g IN clans.item(clan).games.wins.all.reverse;
+      SET i = clans.item(clan).games.wins.size;
+      FOR g IN clans.item(clan).games.wins.reverse;
     %]
     <tr class="won">
       <td class="numeric">[% i; SET i = i - 1 %]</td>
