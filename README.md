@@ -1,3 +1,9 @@
+![Screenshot](https://i.imgur.com/zmP468V.png)
+
+See more screenshots [here](https://imgur.com/a/b5ncZ9P)
+
+----
+
 # splatstats
 DCSS Tournament TeamSplat Statistics
 
