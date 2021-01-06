@@ -278,7 +278,7 @@ foreach my $server (keys %{$cfg->{servers}}) {
       # add clan id to every row
       $row{clan} = $player_index{$row{name}};
 
-      # convert dates into epoch/human readble format and match time bracket
+      # convert dates into epoch/human readable format and match time bracket
       my $tm_start = to_moment($row{start});
       $row{start_epoch} = $tm_start->epoch;
       next if $tm_start < $cfg->{tournament}{start};
