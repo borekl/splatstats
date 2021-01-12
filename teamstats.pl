@@ -400,7 +400,10 @@ foreach my $clan (@clans) {
 #--- clan ghost kills ---------------------------------------------------------
 
 foreach my $clan (@clans) {
-  $data{clans}{$clan}{gkills} = grep { $_->{type} eq 'ghost' } @$milestones;
+  $data{clans}{$clan}{gkills} = grep {
+    $_->{clan} eq $clan
+    && $_->{type} eq 'ghost'
+  } @$milestones;
 }
 
 #--- by-player stats ----------------------------------------------------------
