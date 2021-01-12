@@ -235,96 +235,99 @@ foreach my $server (keys %{$cfg->{servers}}) {
 
   say "Processing $server";
 
-  foreach my $log (qw(log milestones)) {
+  try {
 
-    # get URL and localfile
-    my $url = $cfg->{servers}{$server}{$log}{url};
-    my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
+    foreach my $log (qw(log milestones)) {
 
-    # get our last position in the file (or 0 if none)
-    my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
+      # get URL and localfile
+      my $url = $cfg->{servers}{$server}{$log}{url};
+      my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
 
-    # retrieve new data from URL
-    if($cmd_retrieve) {
-      my $r = system(sprintf($cfg->{wget}, $file, $url));
-      die "Failed to get $url" if $r;
+      # get our last position in the file (or 0 if none)
+      my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
+
+      # retrieve new data from URL
+      if($cmd_retrieve) {
+        my $r = system(sprintf($cfg->{wget}, $file, $url));
+        die "Failed to get $url" if $r;
+      }
+
+      # open the file and seek into it
+      open(my $fh, '<', $file) or die 'Failed to open ' . $file;
+      seek($fh, $fpos, 0) if $fpos;
+
+      # read the new data
+      my ($count_total, $count_selected) = (0,0);
+      while(my $line = <$fh>) {
+        chomp $line;
+        my %row;
+
+        # following regex splits the line by ':' delimiter, but ignores '::',
+        # which works as an escape to denote ':' in value
+        foreach my $fv (split(/(?<!:):(?!:)/, $line)) {
+          $fv =~ s/::/:/g;
+          my @fv = split(/=/, $fv);
+          $row{$fv[0]} = $fv[1];
+        }
+
+        $count_total++;
+
+        # check for team members, ignore all other entries
+        #next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
+        next if !exists $row{name} || !$row{name};
+        next if !exists $player_index{$row{name}};
+
+        # add clan id to every row
+        $row{clan} = $player_index{$row{name}};
+
+        # convert dates into epoch/human readable format and match time bracket
+        my $tm_start = to_moment($row{start});
+        $row{start_epoch} = $tm_start->epoch;
+        next if $tm_start < $cfg->{tournament}{start};
+        $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
+        if($log eq 'log') {
+          my $tm_end = to_moment($row{end});
+          last if $tm_end >= $cfg->{tournament}{end};
+          $row{end_epoch} = $tm_end->epoch;
+          $row{end_fmt} = $tm_end->strftime('%Y-%m-%d %H:%M:%S');
+          $row{dur_fmt} = format_duration($row{dur});
+        } else {
+          my $tm_time = to_moment($row{time});
+          next if $tm_time < $cfg->{tournament}{start};
+          last if $tm_time >= $cfg->{tournament}{end};
+          $row{time_epoch} = to_moment($row{time})->epoch;
+          $row{milestone} =~ s/.$//;
+        }
+
+        # save server id
+        $row{server} = $server;
+
+        # get dump url
+        morgue_url(\%row);
+
+        $count_selected++;
+
+        # store into state
+        if($log eq 'log') {
+          push(@{$state->{games}}, \%row);
+        } else {
+          push(@{$state->{milestones}}, \%row);
+        }
+      }
+
+      printf(
+        "  %d new lines (%d matched) in %s/%s\n",
+        $count_total, $count_selected, $server, $log
+      );
+
+      # finish
+      $fpos = tell($fh);
+      $state->{servers}{$server}{$log}{fpos} = $fpos;
+      close($fh);
+
     }
 
-    # open the file and seek into it
-    open(my $fh, '<', $file) or die 'Failed to open ' . $file;
-    seek($fh, $fpos, 0) if $fpos;
-
-    # read the new data
-    my ($count_total, $count_selected) = (0,0);
-    while(my $line = <$fh>) {
-      chomp $line;
-      my %row;
-
-      # following regex splits the line by ':' delimiter, but ignores '::',
-      # which works as an escape to denote ':' in value
-      foreach my $fv (split(/(?<!:):(?!:)/, $line)) {
-        $fv =~ s/::/:/g;
-        my @fv = split(/=/, $fv);
-        $row{$fv[0]} = $fv[1];
-      }
-
-      $count_total++;
-
-      # check for team members, ignore all other entries
-      #next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
-      next if !exists $row{name} || !$row{name};
-      next if !exists $player_index{$row{name}};
-
-      # add clan id to every row
-      $row{clan} = $player_index{$row{name}};
-
-      # convert dates into epoch/human readable format and match time bracket
-      my $tm_start = to_moment($row{start});
-      $row{start_epoch} = $tm_start->epoch;
-      next if $tm_start < $cfg->{tournament}{start};
-      $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
-      if($log eq 'log') {
-        my $tm_end = to_moment($row{end});
-        last if $tm_end >= $cfg->{tournament}{end};
-        $row{end_epoch} = $tm_end->epoch;
-        $row{end_fmt} = $tm_end->strftime('%Y-%m-%d %H:%M:%S');
-        $row{dur_fmt} = format_duration($row{dur});
-      } else {
-        my $tm_time = to_moment($row{time});
-        next if $tm_time < $cfg->{tournament}{start};
-        last if $tm_time >= $cfg->{tournament}{end};
-        $row{time_epoch} = to_moment($row{time})->epoch;
-        $row{milestone} =~ s/.$//;
-      }
-
-      # save server id
-      $row{server} = $server;
-
-      # get dump url
-      morgue_url(\%row);
-
-      $count_selected++;
-
-      # store into state
-      if($log eq 'log') {
-        push(@{$state->{games}}, \%row);
-      } else {
-        push(@{$state->{milestones}}, \%row);
-      }
-    }
-
-    printf(
-      "  %d new lines (%d matched) in %s/%s\n",
-      $count_total, $count_selected, $server, $log
-    );
-
-    # finish
-    $fpos = tell($fh);
-    $state->{servers}{$server}{$log}{fpos} = $fpos;
-    close($fh);
-
-  }
-
+  };
 }
 
 #=== processing data ==========================================================
