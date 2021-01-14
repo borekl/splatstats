@@ -13,7 +13,7 @@
 <div class="header">
   <h1>
     <a href="./"><img class="icon" src="favicon.svg"></a>
-    <a href="https://crawl.develz.org/tournament/[% cfg.tournament.version %]/players/teamsplat-[% player.lower %].html"
+    <a href="https://crawl.develz.org/tournament/[% cfg.tournament.version %]/players/[% player.lower %].html"
     >[% player %]</a>
   </h1>
   <h3 class="uppercase"><a href="./clan-[% clan %].html">[% clanname %]</a></h3>
