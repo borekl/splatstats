@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use v5.10;
 
+use lib 'lib';
+
 use Path::Tiny;
 use JSON::MaybeXS;
 use Time::Moment;
@@ -12,10 +14,13 @@ use Template;
 use Getopt::Long;
 use Data::Dumper;
 
+use TeamStats::Config;
+
 #=== globals ==================================================================
 
 my $js = JSON::MaybeXS->new(pretty => 1, utf8 => 1);
-my $cfg;
+my $cfg2 = TeamStats::Config->instance;
+my $cfg = $cfg2->config;
 
 #=== command line options =====================================================
 
@@ -187,17 +192,6 @@ GetOptions(
 
 #=== load configuration =======================================================
 
-my $config_file = path('config.json');
-$cfg = $js->decode($config_file->slurp_raw);
-
-# convert tournament.start and tournament.end values into Time::Moment
-# instances
-foreach my $t (qw(start end)) {
-  if(exists $cfg->{tournament}{$t}) {
-    $cfg->{tournament}{$t} = Time::Moment->from_string($cfg->{tournament}{$t});
-  }
-}
-
 # get list of clans
 my @clans = keys %{$cfg->{clans}};
 
@@ -287,18 +281,18 @@ foreach my $server (keys %{$cfg->{servers}}) {
         # convert dates into epoch/human readable format and match time bracket
         my $tm_start = to_moment($row{start});
         $row{start_epoch} = $tm_start->epoch;
-        next if $tm_start < $cfg->{tournament}{start};
+        next if $tm_start < $cfg2->start;
         $row{start_fmt} = $tm_start->strftime('%Y-%m-%d %H:%M:%S');
         if($log eq 'log') {
           my $tm_end = to_moment($row{end});
-          last if $tm_end >= $cfg->{tournament}{end};
+          last if $tm_end >= $cfg2->end;
           $row{end_epoch} = $tm_end->epoch;
           $row{end_fmt} = $tm_end->strftime('%Y-%m-%d %H:%M:%S');
           $row{dur_fmt} = format_duration($row{dur});
         } else {
           my $tm_time = to_moment($row{time});
-          next if $tm_time < $cfg->{tournament}{start};
-          last if $tm_time >= $cfg->{tournament}{end};
+          next if $tm_time < $cfg2->start;
+          last if $tm_time >= $cfg2->end;
           $row{time_epoch} = to_moment($row{time})->epoch;
           $row{milestone} =~ s/.$//;
         }
@@ -347,7 +341,7 @@ my $milestones = $state->{milestones};
 #--- resolve "now" moment ----------------------------------------------------
 
 my $now = time();
-my $end_of_tourney = $cfg->{tournament}{end}->epoch;
+my $end_of_tourney = $cfg2->end->epoch;
 $now = $end_of_tourney if $now > $end_of_tourney;
 
 #--- add 'time_from_now' field to milestones
@@ -671,14 +665,14 @@ $data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
 
 my @count_to;
 
-if($now < $cfg->{tournament}{start}) {
+if($now < $cfg2->start) {
   $data{phase} = 'before';
   @count_to = @{$cfg->{tournament}}{'start','end'};
-} elsif($cfg->{tournament}{end} <= $now) {
+} elsif($cfg2->end <= $now) {
   $data{phase} = 'after';
 } else {
   $data{phase} = 'during';
-  @count_to = ($cfg->{tournament}{end});
+  @count_to = ($cfg2->end);
 }
 
 #--- countdown
