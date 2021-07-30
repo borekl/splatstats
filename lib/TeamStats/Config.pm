@@ -28,7 +28,10 @@ has config => ( is => 'lazy' );
 has start => ( is => 'lazy' );
 has end => ( is => 'lazy' );
 
-#--- methods ------------------------------------------------------------------
+# player to clan index
+has plr_to_clan => ( is => 'lazy');
+
+#--- attribute builders -------------------------------------------------------
 
 sub _build_config ($self)
 {
@@ -51,6 +54,41 @@ sub _build_end ($self)
   die 'Tournament end not defined' unless $cfg->{tournament}{end};
   return Time::Moment->from_string($cfg->{tournament}{end});
 }
+
+sub _build_plr_to_clan ($self)
+{
+  my %player_index;
+
+  foreach my $clan ($self->clans) {
+    foreach my $player ($self->players) {
+      $player_index{$player} = $clan;
+    }
+  }
+
+  return \%player_index;
+}
+
+#--- methods ------------------------------------------------------------------
+
+sub clans ($self)
+{
+  my $cfg = $self->config;
+  return keys %{$cfg->{clans}};
+}
+
+sub players ($self, $clan=undef)
+{
+  my $cfg = $self->config;
+
+  my @players;
+  foreach my $cl ($self->clans) {
+    next unless !$clan || $cl eq $clan;
+    push(@players, @{$cfg->{clans}{$cl}{members}});
+  }
+
+  return @players;
+}
+
 
 #------------------------------------------------------------------------------
 

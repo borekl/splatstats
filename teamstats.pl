@@ -192,20 +192,8 @@ GetOptions(
 
 #=== load configuration =======================================================
 
-# get list of clans
-my @clans = keys %{$cfg->{clans}};
-
-# get list of players
-my (@players, %player_index);
-foreach my $clan (@clans) {
-  foreach my $player (@{$cfg->{clans}{$clan}{members}}) {
-    $player_index{$player} = $clan;
-    push(@players, $player);
-  }
-}
-
-say 'Configured clans: ', join(', ', @clans);
-say 'Configured players: ', join(', ', @players);
+say 'Configured clans: ', join(', ', $cfg2->clans);
+say 'Configured players: ', join(', ', $cfg2->players);
 
 #=== state initialization/loading ============================================
 
@@ -273,10 +261,10 @@ foreach my $server (keys %{$cfg->{servers}}) {
         # check for team members, ignore all other entries
         #next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
         next if !exists $row{name} || !$row{name};
-        next if !exists $player_index{$row{name}};
+        next if !exists $cfg2->plr_to_clan->{$row{name}};
 
         # add clan id to every row
-        $row{clan} = $player_index{$row{name}};
+        $row{clan} = $cfg2->plr_to_clan->{$row{name}};
 
         # convert dates into epoch/human readable format and match time bracket
         my $tm_start = to_moment($row{start});
@@ -359,7 +347,7 @@ foreach my $g (@$games) {
 
 #--- list of all clan games sorted by end time --------------------------------
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   $data{clans}{$clan}{games}{all} = [
     sort { $b->{end_epoch} <=> $a->{end_epoch} }
     grep { $_->{clan} eq $clan } @$games
@@ -368,7 +356,7 @@ foreach my $clan (@clans) {
 
 #--- list of won clan games --------------------------------------------------
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   my @wins = sort {
     $a->{end_epoch} <=> $b->{end_epoch}
   } grep {
@@ -387,7 +375,7 @@ foreach my $clan (@clans) {
 
 #--- clan combos --------------------------------------------------------------
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   my %combos;
   foreach my $row (@{$data{clans}{$clan}{games}{wins}}) {
     $combos{ $row->{char} }++;
@@ -397,7 +385,7 @@ foreach my $clan (@clans) {
 
 #--- clan ghost kills ---------------------------------------------------------
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   $data{clans}{$clan}{gkills} = grep {
     $_->{clan} eq $clan
     && $_->{type} eq 'ghost'
@@ -406,7 +394,7 @@ foreach my $clan (@clans) {
 
 #--- by-player stats ----------------------------------------------------------
 
-foreach my $player (@players) {
+foreach my $player ($cfg2->players) {
 
   # all games
   $data{players}{$player}{games}{all} = [
@@ -475,13 +463,13 @@ foreach my $ms (sort { $a->{time_epoch} <=> $b->{time_epoch} } @$milestones) {
 # "player.PLR.in_progress". The stored entities are references to the last
 # milestone entries of ongoing games.
 
-foreach my $player (@players) {
+foreach my $player ($cfg2->players) {
 
   # ignore players without any recorded milestones
   next if !exists $data{players}{$player}{last_milestones};
 
   # get player's clan association
-  my $clan = $player_index{$player};
+  my $clan = $cfg2->plr_to_clan->{$player};
 
   # initialize in progress lists
   $data{players}{$player}{in_progress} = [];
@@ -507,7 +495,7 @@ foreach my $player (@players) {
 }
 
 # sort all clans' games in progress list
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   $data{clans}{$clan}{in_progress} = [
     sort {
       $a->{time_from_now} <=> $b->{time_from_now}
@@ -517,7 +505,7 @@ foreach my $clan (@clans) {
 
 #--- best clan games ----------------------------------------------------------
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   # best turncount
   $data{clans}{$clan}{games}{wins_by_turncount} = [
     sort {
@@ -579,7 +567,7 @@ foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'rune';
   $ms->{milestone} =~ /\b(\w+)\srune\b/;
   my $rune = $1;
-  my $clan = $player_index{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
   $data{clans}{$clan}{runes}{$rune}++;
   $data{players}{$ms->{name}}{runes}{$rune}++;
 }
@@ -588,7 +576,7 @@ foreach my $ms (@$milestones) {
 
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'god.maxpiety';
-  my $clan = $player_index{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
   $data{clans}{$clan}{godpiety}{$ms->{god}}++;
   $data{players}{$ms->{name}}{godpiety}{$ms->{god}}++;
 }
@@ -601,7 +589,7 @@ foreach my $ms (@$milestones) {
 foreach my $g (@$games) {
   next if $g->{ktyp} ne 'winning';
   my $god = $g->{god};
-  my $clan = $player_index{$g->{name}};
+  my $clan = $cfg2->plr_to_clan->{$g->{name}};
   if(!$god) {
     if(check_atheist(\%data, $g)) {
       $data{clans}{$clan}{godwin}{'No god'}++;
@@ -624,17 +612,17 @@ foreach my $g (@$games) {
 
 # uniques harvest status, both for individual players and clan as a whole
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   $data{clans}{$clan}{uniques} = {};
 }
 
-foreach my $player (@players) {
+foreach my $player ($cfg2->players) {
   $data{players}{$player}{uniques} = {};
 }
 
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'uniq';
-  my $clan = $player_index{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
   my $msg = $ms->{milestone};
   $msg =~ s/\d+-headed\s//;
   $msg =~ s/Royal Jelly/royal jelly/;
@@ -714,7 +702,7 @@ $tt->process(
   'index.html'
 ) or die;
 
-foreach my $clan (@clans) {
+foreach my $clan ($cfg2->clans) {
   $data{clan} = $clan;
   $data{clanname} = $cfg->{clans}{$clan}{name};
   $tt->process(
@@ -730,9 +718,9 @@ foreach my $clan (@clans) {
   ) or die;
 }
 
-foreach my $player (@players) {
+foreach my $player ($cfg2->players) {
   $data{player} = $player;
-  $data{clan} = $player_index{$player};
+  $data{clan} = $cfg2->plr_to_clan->{$player};
   $data{clanname} = $cfg->{clans}{$data{clan}}{name};
   $tt->process(
     'player.tt',
