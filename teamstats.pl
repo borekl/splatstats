@@ -267,8 +267,12 @@ foreach my $server (keys %{$cfg->{servers}}) {
         foreach my $fv (split(/(?<!:):(?!:)/, $line)) {
           $fv =~ s/::/:/g;
           my @fv = split(/=/, $fv);
-          $row{$fv[0]} = $fv[1];
+          $row{$fv[0]} = $fv[1] if $fv[0];
         }
+
+        # rudimentary detection of malformed lines; 'v' field is the first one
+        # so if some mangling happens, this is very likely to go missing
+        next unless exists $row{v};
 
         $count_total++;
 
