@@ -335,7 +335,7 @@
     <tr>
       [% SET m = clans.item(clan).games.by_xlrune.item(0) %]
       <th>Lowest XL rune</th>
-      <td><a href="[% g.name %].html">[% g.name %]</a></td>
+      <td><a href="[% m.name %].html">[% m.name %]</a></td>
       <td>
         [% m.char %]
         [% IF m.god %] of [% m.god %][% END %]
