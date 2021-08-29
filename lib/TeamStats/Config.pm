@@ -12,6 +12,7 @@ use experimental 'signatures';
 use Carp;
 use JSON::MaybeXS;
 use Path::Tiny qw(path);
+use Time::Moment;
 
 #--- attributes ---------------------------------------------------------------
 
@@ -30,6 +31,12 @@ has end => ( is => 'lazy' );
 
 # player to clan index
 has plr_to_clan => ( is => 'lazy');
+
+# generation time
+has now => ( is => 'lazy' );
+
+# phase of the tournamnet (before/during/after)
+has phase => ( is => 'lazy' );
 
 #--- attribute builders -------------------------------------------------------
 
@@ -68,6 +75,22 @@ sub _build_plr_to_clan ($self)
   return \%player_index;
 }
 
+sub _build_now ($self)
+{
+  return Time::Moment->now_utc;
+}
+
+sub _build_phase ($self)
+{
+  if($self->now < $self->start) {
+    return 'before';
+  } elsif($self->end <= $self->now) {
+    return 'after';
+  } else {
+    return 'during';
+  }
+}
+
 #--- methods ------------------------------------------------------------------
 
 sub clans ($self)
@@ -89,6 +112,20 @@ sub players ($self, $clan=undef)
   return @players;
 }
 
+# create a list of future countdown targets; if we are before the tournament,
+# there are two targets (the start and the end), if we are during the
+# tournament, then there is only one (the end); if we are after, there are none
+
+sub count_to ($self)
+{
+  if($self->phase eq 'before') {
+    return ($self->start, $self->end);
+  } elsif($self->phase eq 'after') {
+    return ();
+  } else {
+    return self->end
+  }
+}
 
 #------------------------------------------------------------------------------
 

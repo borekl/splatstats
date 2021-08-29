@@ -328,7 +328,7 @@ my $milestones = $state->{milestones};
 
 #--- resolve "now" moment ----------------------------------------------------
 
-my $now = time();
+my $now = $cfg2->now->epoch;
 my $end_of_tourney = $cfg2->end->epoch;
 $now = $end_of_tourney if $now > $end_of_tourney;
 
@@ -638,36 +638,18 @@ foreach my $ms (@$milestones) {
   $data{players}{$ms->{name}}{uniques}{$unique}++;
 }
 
-#--- generation time ----------------------------------------------------------
+#--- generation time, phase ---------------------------------------------------
 
-$now = Time::Moment->now_utc;
-$data{gentime} = $now->strftime('%Y-%m-%d %H:%M:%S');
-
-#--- tournament phase and future countdown targets
-
-# following code find at what timepoint in relation to the tournament we are
-# (before, during, after); and also creates a list (@count_to) of future
-# countdown targets; if we are before the tournament, there are two targets
-# (the start and the end), if we are during the tournament, then there is only
-# one (the end); if we are after, there are none
-
-my @count_to;
-
-if($now < $cfg2->start) {
-  $data{phase} = 'before';
-  @count_to = @{$cfg->{tournament}}{'start','end'};
-} elsif($cfg2->end <= $now) {
-  $data{phase} = 'after';
-} else {
-  $data{phase} = 'during';
-  @count_to = ($cfg2->end);
-}
+$data{gentime} = $cfg2->now->strftime('%Y-%m-%d %H:%M:%S');
+$data{phase} = $cfg2->phase;
 
 #--- countdown
 
 # format the actual countdown string for server-side rendered countdown and
 # create list of countdown targets (in epoch format) for the front-side
 # countdown JavaScript code
+
+my @count_to = $cfg2->count_to;
 
 if($data{phase} ne 'after') {
   use integer;
