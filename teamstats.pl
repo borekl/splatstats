@@ -654,7 +654,7 @@ my @count_to = $cfg2->count_to;
 if($data{phase} ne 'after') {
   use integer;
 
-  my $s = $now->delta_seconds($count_to[0]);
+  my $s = $cfg2->now->delta_seconds($count_to[0]);
   my $d = $s / 86400; $s %= 86400;
   my $h = $s / 3600; $s %= 3600;
   my $m = $s / 60; $s %= 60;

@@ -123,7 +123,7 @@ sub count_to ($self)
   } elsif($self->phase eq 'after') {
     return ();
   } else {
-    return self->end
+    return $self->end
   }
 }
 
