@@ -106,9 +106,9 @@
       "Frances", "Frederick", "Gastronok", "Geryon", "Gloorx Vloq", "Grinder",
       "Grum",  "Harold", "Ignacio", "Ijyb", "Ilsuiw", "Jessica", "Jorgrun",
       "Jory", "Joseph", "Josephine", "Khufu", "Kirke", "Lom Lobon", "Louise",
-      "Mara", "Margery", "Maurice", "Maggie", "Menkaure", "Mennas", "Mnoleg",
-      "Murray", "Natasha", "Nergalle", "Nessos", "Nikola", "Pikel",
-      "Polyphemus", "Prince Ribbit", "Psyche", "Purgy", "Robin", "Roxanne",
+      "Mara", "Margery", "Maurice", "Maggie", "Menkaure", "Mennas", "Mlioglotl",
+      "Mnoleg", "Murray", "Natasha", "Nergalle", "Nessos", "Nikola", "Pikel",
+      "Polyphemus", "Prince Ribbit", "Psyche", "Pargy", "Robin", "Roxanne",
       "Rupert", "Saint Roka", "Sigmund", "Snorg", "Sojobo", "Sonja", "Terence",
       "the Enchantress", "the Lernaean hydra", "the royal jelly",
       "the Serpent of Hell", "Tiamat", "Urug", "Vashnia", "Xtahua"
@@ -116,10 +116,10 @@
 
     "gods" : [
       null, "Ashenzari", "Beogh", "Cheibriados", "Dithmenos", "Elyvilon",
-      "Fedhas", "Gozag", "Hepliaklqana", "Jiyva", "Kikubaaqudgha", "Lugonu",
-      "Makhleb", "Nemelex Xobeh", "Okawaru", "Qazlal", "Ru", "Sif Muna",
-      "Trog", "the Shining One", "Uskayaw", "Vehumet", "Wu Jian", "Xom",
-      "Yredelemnul", "Zin"
+      "Fedhas", "Gozag", "Hepliaklqana", "Ignis", "Jiyva", "Kikubaaqudgha",
+      "Lugonu", "Makhleb", "Nemelex Xobeh", "Okawaru", "Qazlal", "Ru",
+      "Sif Muna", "Trog", "the Shining One", "Uskayaw", "Vehumet", "Wu Jian",
+      "Xom", "Yredelemnul", "Zin"
     ]
 
   }
