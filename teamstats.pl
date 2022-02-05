@@ -595,7 +595,7 @@ foreach my $g (@$games) {
       $data{clans}{$clan}{godwin}{'No god'}++;
       $data{players}{$g->{name}}{godwin}{'No god'}++;
     }
-  } elsif($god eq 'Xom' || $god eq 'Gozag') {
+  } elsif($god eq 'Xom' || $god eq 'Gozag' || $god eq 'Ignis') {
     if(check_god_exclusivity(\%data, $g)) {
       $data{clans}{$clan}{godwin}{$god}++;
       $data{players}{$g->{name}}{godwin}{$god}++;
