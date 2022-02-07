@@ -68,7 +68,7 @@ sub _build_plr_to_clan ($self)
 
   foreach my $clan ($self->clans) {
     foreach my $player ($self->players($clan)) {
-      $player_index{$player} = $clan;
+      $player_index{lc $player} = $clan;
     }
   }
 

@@ -261,10 +261,10 @@ foreach my $server (keys %{$cfg->{servers}}) {
         # check for team members, ignore all other entries
         #next if !(grep { $_ eq $row{name} } @{$cfg->{match}{members}});
         next if !exists $row{name} || !$row{name};
-        next if !exists $cfg2->plr_to_clan->{$row{name}};
+        next if !exists $cfg2->plr_to_clan->{lc $row{name}};
 
         # add clan id to every row
-        $row{clan} = $cfg2->plr_to_clan->{$row{name}};
+        $row{clan} = $cfg2->plr_to_clan->{lc $row{name}};
 
         # convert dates into epoch/human readable format and match time bracket
         my $tm_start = to_moment($row{start});
@@ -469,7 +469,7 @@ foreach my $player ($cfg2->players) {
   next if !exists $data{players}{$player}{last_milestones};
 
   # get player's clan association
-  my $clan = $cfg2->plr_to_clan->{$player};
+  my $clan = $cfg2->plr_to_clan->{lc $player};
 
   # initialize in progress lists
   $data{players}{$player}{in_progress} = [];
@@ -567,7 +567,7 @@ foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'rune';
   $ms->{milestone} =~ /\b(\w+)\srune\b/;
   my $rune = $1;
-  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{lc $ms->{name}};
   $data{clans}{$clan}{runes}{$rune}++;
   $data{players}{$ms->{name}}{runes}{$rune}++;
 }
@@ -576,7 +576,7 @@ foreach my $ms (@$milestones) {
 
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'god.maxpiety';
-  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{lc $ms->{name}};
   $data{clans}{$clan}{godpiety}{$ms->{god}}++;
   $data{players}{$ms->{name}}{godpiety}{$ms->{god}}++;
 }
@@ -589,7 +589,7 @@ foreach my $ms (@$milestones) {
 foreach my $g (@$games) {
   next if $g->{ktyp} ne 'winning';
   my $god = $g->{god};
-  my $clan = $cfg2->plr_to_clan->{$g->{name}};
+  my $clan = $cfg2->plr_to_clan->{lc $g->{name}};
   if(!$god) {
     if(check_atheist(\%data, $g)) {
       $data{clans}{$clan}{godwin}{'No god'}++;
@@ -622,7 +622,7 @@ foreach my $player ($cfg2->players) {
 
 foreach my $ms (@$milestones) {
   next if $ms->{type} ne 'uniq';
-  my $clan = $cfg2->plr_to_clan->{$ms->{name}};
+  my $clan = $cfg2->plr_to_clan->{lc $ms->{name}};
   my $msg = $ms->{milestone};
   $msg =~ s/\d+-headed\s//;
   $msg =~ s/Royal Jelly/royal jelly/;
@@ -702,7 +702,7 @@ foreach my $clan ($cfg2->clans) {
 
 foreach my $player ($cfg2->players) {
   $data{player} = $player;
-  $data{clan} = $cfg2->plr_to_clan->{$player};
+  $data{clan} = $cfg2->plr_to_clan->{lc $player};
   $data{clanname} = $cfg->{clans}{$data{clan}}{name};
   $tt->process(
     'player.tt',
