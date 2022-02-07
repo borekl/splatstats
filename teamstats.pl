@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use v5.10;
+use experimental 'signatures', 'postderef';
 
 use lib 'lib';
 
@@ -13,6 +14,7 @@ use Try::Tiny;
 use Template;
 use Getopt::Long;
 use Data::Dumper;
+use List::Util qw(first);
 
 use TeamStats::Config;
 
@@ -109,22 +111,31 @@ sub server_url
   return $template;
 }
 
-# check if given game reached maxpiety with the winning deity; this is the
-# requirement for a game to count as "won with god" (excluding Xom/Gozag)
+# return the name of the god for which the player reached the 6* piety, but only
+# if it is the first deity worshipped; in all other cases return undef
 
-sub check_god_maxpiety
+sub check_god_maxpiety ($data, $game)
 {
-  my $data = shift;
-  my $g = shift;
-  my $god = $g->{god};
+  # get the first god in the game
+  my $first_god = first {
+    $_->{name} eq $game->{name}
+    && $_->{server} eq $game->{server}
+    && $_->{start_epoch} == $game->{start_epoch}
+    && $_->{god}
+  } $data->{milestones}->@*;
 
+  # get the first god.maxpiety milestone
+  my $max_piety = first {
+    $_->{start_epoch} == $game->{start_epoch}
+    && $_->{type} eq 'god.maxpiety'
+  } $data->{milestones}->@*;
+
+  # finish
   if(
-    grep {
-      $_->{start_epoch} == $g->{start_epoch}
-      && $_->{type} eq 'god.maxpiety'
-    } @{$data->{milestones}}
+    $first_god && $max_piety
+    && $first_god->{god} eq $max_piety->{god}
   ) {
-    return 1;
+    return $max_piety->{god}
   } else {
     return undef;
   }
@@ -572,16 +583,7 @@ foreach my $ms (@$milestones) {
   $data{players}{$ms->{name}}{runes}{$rune}++;
 }
 
-#--- god maxpiety ------------------------------------------------------------
-
-foreach my $ms (@$milestones) {
-  next if $ms->{type} ne 'god.maxpiety';
-  my $clan = $cfg2->plr_to_clan->{lc $ms->{name}};
-  $data{clans}{$clan}{godpiety}{$ms->{god}}++;
-  $data{players}{$ms->{name}}{godpiety}{$ms->{god}}++;
-}
-
-#--- god won -----------------------------------------------------------------
+#--- god championed & won ------------------------------------------------------
 
 # Xom and Gozag are won only when the player never worships any other god.
 # Other gods are won when player reaches 6* piety and then wins
@@ -601,9 +603,14 @@ foreach my $g (@$games) {
       $data{players}{$g->{name}}{godwin}{$god}++;
     }
   } else {
-    if(check_god_maxpiety(\%data, $g)) {
-      $data{clans}{$clan}{godwin}{$god}++;
-      $data{players}{$g->{name}}{godwin}{$god}++;
+    my $champion_of = check_god_maxpiety(\%data, $g);
+    if($champion_of) {
+      $data{clans}{$clan}{godpiety}{$champion_of}++;
+      $data{players}{$g->{name}}{godpiety}{$champion_of}++;
+      if($champion_of eq $god) {
+        $data{clans}{$clan}{godwin}{$god}++;
+        $data{players}{$g->{name}}{godwin}{$god}++;
+      }
     }
   }
 }
