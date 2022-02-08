@@ -585,8 +585,27 @@ foreach my $ms (@$milestones) {
 
 #--- god championed & won ------------------------------------------------------
 
+foreach my $g (@$games) {
+  my $clan = $cfg2->plr_to_clan->{lc $g->{name}};
+  my $champion_of = check_god_maxpiety(\%data, $g);
+  my $god = $g->{god};
+
+  # game god was championed in the game
+  if($champion_of) {
+    $data{clans}{$clan}{godpiety}{$champion_of}++;
+    $data{players}{$g->{name}}{godpiety}{$champion_of}++;
+    # if the game was won AND the god championed is the same as the god the game
+    # was won with mark this as 'god won'
+    if($g->{ktyp} eq 'winning' && $champion_of eq $god) {
+      $data{clans}{$clan}{godwin}{$god}++;
+      $data{players}{$g->{name}}{godwin}{$god}++;
+    }
+  }
+}
+
+#--- god won (special cases) ---------------------------------------------------
+
 # Xom and Gozag are won only when the player never worships any other god.
-# Other gods are won when player reaches 6* piety and then wins
 
 foreach my $g (@$games) {
   next if $g->{ktyp} ne 'winning';
@@ -601,16 +620,6 @@ foreach my $g (@$games) {
     if(check_god_exclusivity(\%data, $g)) {
       $data{clans}{$clan}{godwin}{$god}++;
       $data{players}{$g->{name}}{godwin}{$god}++;
-    }
-  } else {
-    my $champion_of = check_god_maxpiety(\%data, $g);
-    if($champion_of) {
-      $data{clans}{$clan}{godpiety}{$champion_of}++;
-      $data{players}{$g->{name}}{godpiety}{$champion_of}++;
-      if($champion_of eq $god) {
-        $data{clans}{$clan}{godwin}{$god}++;
-        $data{players}{$g->{name}}{godwin}{$god}++;
-      }
     }
   }
 }
