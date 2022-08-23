@@ -343,8 +343,8 @@
 %]
   <td[% IF players.item(player).uniques.exists(u); ' class="found"'; END %]>[% u %]</td>
   [% cnt = cnt - 1; rowcnt = rowcnt - 1 %]
-  [% LAST IF cnt == 0 %]
   [% IF rowcnt == 0; rowcnt = 5; "</tr></tr>"; END %]
+  [% LAST IF cnt == 0 %]
 [% END %]
   <td class="summary" colspan="[% rowcnt %]">
     [% players.item(player).uniques.keys.size + 0 %]
