@@ -236,7 +236,9 @@ foreach my $server (keys %{$cfg->{servers}}) {
 
       # get URL and localfile
       my $url = $cfg->{servers}{$server}{$log}{url};
-      my $file = $logdir->child($cfg->{servers}{$server}{$log}{file});
+      my $file = $logdir->child(
+        $cfg2->token_replace($cfg->{servers}{$server}{$log}{file})
+      );
 
       # get our last position in the file (or 0 if none)
       my $fpos = $state->{servers}{$server}{$log}{fpos} // 0;
