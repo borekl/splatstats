@@ -115,7 +115,6 @@ sub players ($self, $clan=undef)
 # create a list of future countdown targets; if we are before the tournament,
 # there are two targets (the start and the end), if we are during the
 # tournament, then there is only one (the end); if we are after, there are none
-
 sub count_to ($self)
 {
   if($self->phase eq 'before') {
@@ -126,6 +125,22 @@ sub count_to ($self)
     return $self->end
   }
 }
+
+# Replace %v (decimal version) and %V (integer version)
+sub token_replace ($self, $s)
+{
+  my $v = $self->config->{tournament}{version};
+  my $iv = $v;
+  $iv =~ s/^\d+\.//;
+
+  $s =~ s/%v/$v/g;
+  $s =~ s/%V/$iv/g;
+
+  return $s;
+}
+
+# Return htmldir with token replacement
+sub htmldir ($self) { $self->token_replace($self->config->{htmldir}) }
 
 #------------------------------------------------------------------------------
 

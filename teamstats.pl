@@ -88,6 +88,7 @@ sub morgue_url
   my $tm = to_moment($row->{end})->strftime('%Y%m%d-%H%M%S');
 
   # perform token replacement
+  $template =~ $cfg2->token_replace($template);
   $template =~ s/%u/$player/g;
   $template =~ s/%d/$tm/g;
 
@@ -105,6 +106,7 @@ sub server_url
   my $template = $cfg->{servers}{$server}{$item};
 
   # perform token replacement
+  $template = $cfg2->token_replace($template);
   $template =~ s/%u/$player/g;
 
   # finish
@@ -689,7 +691,7 @@ $data{count_to} = join(',', map { $_->epoch } @count_to);
 #=== generate HTML pages ======================================================
 
 my $tt = Template->new(
-  'OUTPUT_PATH' => $cfg->{htmldir},
+  'OUTPUT_PATH' => $cfg2->htmldir,
   'INCLUDE_PATH' => 'templates',
   'RELATIVE' => 1
 );
